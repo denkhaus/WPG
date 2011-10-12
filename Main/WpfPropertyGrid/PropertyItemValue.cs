@@ -16,15 +16,23 @@
 using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
   /// <summary>
   /// Provides a wrapper around property value to be used at presentation level.
   /// </summary>
-  public class PropertyItemValue : INotifyPropertyChanged
+  public class PropertyItemValue : INotifyPropertyChanged, IDataErrorInfo
   {
     private readonly PropertyItem _property;
+
+    #region IDataErrorInfoValidation Stuff
+    private readonly Dictionary<string, ValidationAttribute[]> _validators;
+    private readonly Dictionary<string, Func<object, object>> _getters;
+    #endregion
 
     #region Events
 
@@ -82,6 +90,18 @@ namespace System.Windows.Controls.WpfPropertyGrid
     {
       if (property == null) throw new ArgumentNullException("property");
       this._property = property;
+
+      #region IDataErrorInfo Validation attributes loading and property value getters
+
+      this._validators = this._property.UnwrappedComponent.GetType().GetProperties().
+          Where(componentProperties => componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true).Length > 0).
+          ToDictionary(componentProperties => componentProperties.Name, componentProperties => (ValidationAttribute[])componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true));
+
+      this._getters = this._property.UnwrappedComponent.GetType().GetProperties().
+          Where(componentProperties => componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true).Length > 0).
+          ToDictionary(componentProperties => componentProperties.Name, componentProperties => new Func<object, object>(propertyWrapper => componentProperties.GetValue(propertyWrapper, null)));
+
+      #endregion
 
       _hasSubProperties = property.Converter.GetPropertiesSupported();
 
@@ -449,5 +469,33 @@ namespace System.Windows.Controls.WpfPropertyGrid
     }
 
     #endregion
+
+    #region IDataErrorInfo Members
+
+    public string Error
+    {
+        get { return null; }
+    }
+
+    public string this[string columnName]
+    {
+        get
+        {
+            if (this._getters.ContainsKey(_property.Name))
+            {
+                var propertyValue = this._getters[_property.Name](_property.UnwrappedComponent);
+
+                var errorMessages = this._validators[_property.Name]
+                    .Where(v => v.IsValid(_property.PropertyValue.Value) == false)
+                    .Select(v => v.FormatErrorMessage(_property.DisplayName)).ToArray();
+
+                return string.Join(Environment.NewLine, errorMessages);
+            }
+
+            return string.Empty;
+        }
+    }
+
+#endregion
   }
 }
