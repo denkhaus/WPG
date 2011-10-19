@@ -790,7 +790,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
     #region Internal API
 
-    internal CategoryItem CreateCategory(DisplayAttribute attribute)
+    internal CategoryItem CreateCategory(DisplayAttribute attribute) // !!! dmh - switch to DisplayAttribute
     {
       // Check the attribute argument to be passed
       Debug.Assert(attribute != null);
@@ -926,7 +926,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
           category = categories[property.CategoryName];
         else
         {
-          category = CreateCategory(property.GetAttribute<DisplayAttribute>());
+          category = CreateCategory(property.GetAttribute<DisplayAttribute>()); // !!! dmh - switch to displayattribute
 
           if (category == null)
           {
