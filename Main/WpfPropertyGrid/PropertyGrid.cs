@@ -25,6 +25,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 {
   using Design;
   using Controls;
+	using System.ComponentModel.DataAnnotations;
   /// <summary>
   /// PropertyGrid control.
   /// </summary>
@@ -789,7 +790,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
     #region Internal API
 
-    internal CategoryItem CreateCategory(CategoryAttribute attribute)
+    internal CategoryItem CreateCategory(DisplayAttribute attribute)
     {
       // Check the attribute argument to be passed
       Debug.Assert(attribute != null);
@@ -925,7 +926,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
           category = categories[property.CategoryName];
         else
         {
-          category = CreateCategory(property.GetAttribute<CategoryAttribute>());
+          category = CreateCategory(property.GetAttribute<DisplayAttribute>());
 
           if (category == null)
           {
@@ -933,7 +934,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
             continue;
           }
 
-          categories[category.Name] = category;
+		  /* !!! dmh - this is not needed here! fixed creating a catagory using GetGroupName() to use localized string
+		  var dispAttr = (DisplayAttribute)property.Attributes[typeof(DisplayAttribute)];
+		  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName))
+            categories[dispAttr.GetGroupName()] = category;
+		  else */
+		  categories[category.Name] = category;
         }
 
         category.AddProperty(property);

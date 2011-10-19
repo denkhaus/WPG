@@ -136,8 +136,11 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
       IsBrowsable = descriptor.IsBrowsable;
       _isReadOnly = descriptor.IsReadOnly;
-      _description = descriptor.Description;
-      _categoryName = descriptor.Category;
+	  // !!! dmh - modify these to check if we have a display attribute to use instead
+	  // - shoehorning these in might cause problems, i really dont know
+	  var dispAttr = (DisplayAttribute)descriptor.Attributes[typeof(DisplayAttribute)];
+      _description = dispAttr != null && !string.IsNullOrEmpty(dispAttr.Description) ? dispAttr.GetDescription() : descriptor.Description;
+      _categoryName = dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName) ? dispAttr.GetGroupName() : descriptor.Category;
       _isLocalizable = descriptor.IsLocalizable;
       
       _metadata = new AttributesContainer(descriptor.Attributes);
@@ -192,9 +195,22 @@ namespace System.Windows.Controls.WpfPropertyGrid
       get
       {
         if (string.IsNullOrEmpty(_displayName))
-          _displayName = GetDisplayName();
+		{
+		  // !!! modified by dmh -> moved GetDisplayName() here since it was only usage.
+		  // !!! modified by dmh - read our display name from DisplayAttribute if there is one
+		  // Try getting Parenthesize attribute
+		  var displayAttr		= GetAttribute<DisplayAttribute>();
+          var parenthesizeAttr	= GetAttribute<ParenthesizePropertyNameAttribute>();
 
-        return _displayName;
+		  // dmh - if we still have a null _displayName return some default here
+	      string dispName = displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name) ? 
+			  displayAttr.GetName() :
+			  (_descriptor == null ? "[Unset Display Name]" : _descriptor.DisplayName);
+          // if property needs parenthesizing then apply parenthesis to resulting display name
+          _displayName = (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? string.Format("({0})", dispName) : dispName;
+        }     
+
+  		return _displayName;
       }
       set
       {
@@ -216,7 +232,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
     /// </returns>
     public string CategoryName
     {
-      get { return _categoryName; }
+      get { return _categoryName; }	  
     } 
     #endregion
 
@@ -594,22 +610,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
       return result;
     }
-        
-    private string GetDisplayName()
-    {
-      // TODO: decide what to be returned in the worst case (no descriptor)
-      if (_descriptor == null) return null;
-
-	  // !!! modified by dmh - read our display name from DisplayAttribute if there is one
-      // Try getting Parenthesize attribute
-	  var displayAttr = GetAttribute<DisplayAttribute>();
-      var parenthesizeAttr = GetAttribute<ParenthesizePropertyNameAttribute>();
-
-	  string dispName = displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name) ? displayAttr.GetName() : _descriptor.DisplayName;
-      // if property needs parenthesizing then apply parenthesis to resulting display name
-      return (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? 
-		  string.Format("({0})", dispName) : dispName ;
-    }
+      
     #endregion
        
     

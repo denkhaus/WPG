@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -158,8 +159,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
     /// </summary>
     /// <param name="owner">The owner.</param>
     /// <param name="category">The category.</param>
-    public CategoryItem(PropertyGrid owner, CategoryAttribute category)
-      : this(owner, category.Category)
+    public CategoryItem(PropertyGrid owner, DisplayAttribute category)
+      : this(owner, category.GetGroupName())  //!!! dmh - need to use GetGroupName so it will use resource string if present
     {
       Attribute = category;
     }
