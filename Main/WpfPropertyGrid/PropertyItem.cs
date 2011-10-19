@@ -15,6 +15,7 @@
  */
 using System.Collections;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -599,13 +600,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
       // TODO: decide what to be returned in the worst case (no descriptor)
       if (_descriptor == null) return null;
 
+	  // !!! modified by dmh - read our display name from DisplayAttribute if there is one
       // Try getting Parenthesize attribute
-      var attr = GetAttribute<ParenthesizePropertyNameAttribute>();
+	  var displayAttr = GetAttribute<DisplayAttribute>();
+      var parenthesizeAttr = GetAttribute<ParenthesizePropertyNameAttribute>();
 
-      // if property needs parenthesizing then apply parenthesis to resulting display name      
-      return (attr != null && attr.NeedParenthesis)
-        ? "(" + _descriptor.DisplayName + ")"
-        : _descriptor.DisplayName;
+	  string dispName = displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name) ? displayAttr.GetName() : _descriptor.DisplayName;
+      // if property needs parenthesizing then apply parenthesis to resulting display name
+      return (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? 
+		  string.Format("({0})", dispName) : dispName ;
     }
     #endregion
        
