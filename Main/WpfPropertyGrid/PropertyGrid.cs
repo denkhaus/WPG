@@ -1130,46 +1130,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
       }
       return null;
     }
-
-
-	// dmh !!! add an instance dependancy property
-	public static readonly DependencyProperty InstanceProperty =
-		DependencyProperty.Register("Instance", typeof(object), typeof(PropertyGrid),
-									new FrameworkPropertyMetadata(null, OnInstanceChanged, CoerceInstance));
-	public object Instance
-	{
-		get { return GetValue(InstanceProperty); }
-		set { SetValue(InstanceProperty, value); }
-	}
-	
-	private static void OnInstanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-	{
-		var propertyGrid = d as PropertyGrid;
-		if (propertyGrid != null) propertyGrid.DoReload();
-	}
-
-	private static object CoerceInstance(DependencyObject d, object value)
-	{
-		var propertyGrid = d as PropertyGrid;
-		if (value == null && propertyGrid != null) 
-			return propertyGrid.NullInstance;
-		return value;
-	}
-
-	public static readonly DependencyProperty NullInstanceProperty =
-			DependencyProperty.Register("NullInstance", typeof(object), typeof(PropertyGrid),
-										new FrameworkPropertyMetadata(null, OnNullInstanceChanged));
-
-	public object NullInstance
-	{
-		get { return GetValue(NullInstanceProperty); }
-		set { SetValue(NullInstanceProperty, value); }
-	}
-
-	private static void OnNullInstanceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-	{
-	}
-	// end dmh
   }
 }
 
