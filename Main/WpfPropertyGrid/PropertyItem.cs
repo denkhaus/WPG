@@ -137,10 +137,21 @@ namespace System.Windows.Controls.WpfPropertyGrid
       IsBrowsable = descriptor.IsBrowsable;
       _isReadOnly = descriptor.IsReadOnly;
 	  // !!! dmh - modify these to check if we have a display attribute to use instead
-	  // - shoehorning these in might cause problems, i really dont know
 	  var dispAttr = (DisplayAttribute)descriptor.Attributes[typeof(DisplayAttribute)];
-      _description = dispAttr != null && !string.IsNullOrEmpty(dispAttr.Description) ? dispAttr.GetDescription() : descriptor.Description;
-      _categoryName = dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName) ? dispAttr.GetGroupName() : descriptor.Category;
+	  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.Description))
+	  {
+	    try		{  _description = dispAttr.GetDescription(); } 
+		catch	{ _description = dispAttr.Description; }
+	  }
+	  else _description = descriptor.Description; 
+	  
+	  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName))
+	  {
+		try   { _categoryName = dispAttr.GetGroupName(); } 
+		catch { _categoryName = dispAttr.GroupName; }  
+	  }
+	  else _categoryName = descriptor.Category; 
+
       _isLocalizable = descriptor.IsLocalizable;
       
       _metadata = new AttributesContainer(descriptor.Attributes);
@@ -203,9 +214,14 @@ namespace System.Windows.Controls.WpfPropertyGrid
           var parenthesizeAttr	= GetAttribute<ParenthesizePropertyNameAttribute>();
 
 		  // dmh - if we still have a null _displayName return some default here
-	      string dispName = displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name) ? 
-			  displayAttr.GetName() :
-			  (_descriptor == null ? "[Unset Display Name]" : _descriptor.DisplayName);
+	      string dispName;
+		  if (displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name))
+		  {
+			  try	{ dispName = displayAttr.GetName(); }
+			  catch { dispName = displayAttr.Name; } 
+		  }
+		  else dispName =  _descriptor.DisplayName;
+
           // if property needs parenthesizing then apply parenthesis to resulting display name
           _displayName = (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? string.Format("({0})", dispName) : dispName;
         }     

@@ -163,7 +163,11 @@ namespace System.Windows.Controls.WpfPropertyGrid
      // : this(owner, category.GetGroupName())  //!!! dmh - switch to displayAttribute & use GetGroupName so it will use resource string if present
     {
 	  Owner = owner;
-	  Name = !string.IsNullOrEmpty(category.GroupName) ? category.GetGroupName() : category.Name;
+	  if (!string.IsNullOrEmpty(category.GroupName))
+	  {
+		try   {  Name = category.GetGroupName(); } 
+		catch {  Name = category.GroupName; }
+	  }
       Attribute = category;
     }
 

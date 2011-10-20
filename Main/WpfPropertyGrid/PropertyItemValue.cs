@@ -400,7 +400,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
     /// <returns>Culture to serialize value.</returns>
     protected virtual CultureInfo GetSerializationCulture()
     {
-      return ObjectServices.GetSerializationCulture(_property.PropertyType);
+      return ObjectServices.GetSerializationCulture(_property.PropertyType);	
     }
 
     #region INotifyPropertyChanged Members
