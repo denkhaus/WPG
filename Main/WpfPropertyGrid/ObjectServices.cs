@@ -91,7 +91,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
     } 
     #endregion
 
-    [Obsolete("This member will be superceded by PropertyItem.SerializationCulture in the next versions of component", false)]
+	// dmh - comment this out until it is actually added
+    //[Obsolete("This member will be superceded by PropertyItem.SerializationCulture in the next versions of component", false)]
     public static CultureInfo GetSerializationCulture(Type propertyType)
     {
       var currentCulture = CultureInfo.CurrentCulture;

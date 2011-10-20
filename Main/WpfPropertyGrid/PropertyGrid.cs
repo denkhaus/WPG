@@ -793,7 +793,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
     internal CategoryItem CreateCategory(DisplayAttribute attribute) // !!! dmh - switch to DisplayAttribute
     {
       // Check the attribute argument to be passed
-      // Debug.Assert(attribute != null); dmh - comment this out, null is expected on browsable
+      Debug.Assert(attribute != null); 
       if (attribute == null) return null;
 
       // Check browsable restrictions
