@@ -793,7 +793,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
     internal CategoryItem CreateCategory(DisplayAttribute attribute) // !!! dmh - switch to DisplayAttribute
     {
       // Check the attribute argument to be passed
-      Debug.Assert(attribute != null);
+      // Debug.Assert(attribute != null); dmh - comment this out, null is expected on browsable
       if (attribute == null) return null;
 
       // Check browsable restrictions
@@ -926,7 +926,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
           category = categories[property.CategoryName];
         else
         {
-          category = CreateCategory(property.GetAttribute<DisplayAttribute>()); // !!! dmh - switch to displayattribute
+		  // dmh - hack for no given DisplayAttribute making Misc end up in refused categories, a default Category is assigned elsewhere or somethign
+		  var displayAttr = property.GetAttribute<DisplayAttribute>();
+          category = CreateCategory(displayAttr ?? new DisplayAttribute { GroupName = property.CategoryName });
 
           if (category == null)
           {

@@ -160,8 +160,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
     /// <param name="owner">The owner.</param>
     /// <param name="category">The category.</param>
     public CategoryItem(PropertyGrid owner, DisplayAttribute category)
-      : this(owner, category.GetGroupName())  //!!! dmh - switch to displayAttribute & use GetGroupName so it will use resource string if present
+     // : this(owner, category.GetGroupName())  //!!! dmh - switch to displayAttribute & use GetGroupName so it will use resource string if present
     {
+	  Owner = owner;
+	  Name = !string.IsNullOrEmpty(category.GroupName) ? category.GetGroupName() : category.Name;
       Attribute = category;
     }
 
