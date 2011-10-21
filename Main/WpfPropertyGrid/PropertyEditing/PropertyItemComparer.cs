@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -45,13 +46,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
       int leftOrder = 0;
 
-      var attribute = x.GetAttribute<PropertyOrderAttribute>();
+	  // !!! dmh - switch to use Order from DisplayAttribute instead
+      var attribute = x.GetAttribute<DisplayAttribute>();
       if (attribute != null)
         leftOrder = attribute.Order;
 
       int rightOrder = 0;
-
-      attribute = y.GetAttribute<PropertyOrderAttribute>();
+	  
+	  // !!! dmh - switch to use Order from DisplayAttribute instead
+      attribute = y.GetAttribute<DisplayAttribute>();
       if (attribute != null)
         rightOrder = attribute.Order;
 

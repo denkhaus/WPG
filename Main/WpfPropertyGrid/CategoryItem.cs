@@ -165,8 +165,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	  Owner = owner;
 	  if (!string.IsNullOrEmpty(category.GroupName))
 	  {
-		try   {  Name = category.GetGroupName(); } 
-		catch {  Name = category.GroupName; }
+		if (category.ResourceType != null)
+		{
+			try   {  Name = category.GetGroupName(); } 
+			catch {  Name = category.GroupName; }
+		}
+		else Name = category.GroupName; 
 	  }
       Attribute = category;
     }

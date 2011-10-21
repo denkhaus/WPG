@@ -140,15 +140,23 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	  var dispAttr = (DisplayAttribute)descriptor.Attributes[typeof(DisplayAttribute)];
 	  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.Description))
 	  {
-	    try		{  _description = dispAttr.GetDescription(); } 
-		catch	{ _description = dispAttr.Description; }
+	    if (dispAttr.ResourceType != null) 
+		{
+	      try    {  _description = dispAttr.GetDescription(); } 
+		  catch  { _description = dispAttr.Description; }
+		}
+		else  _description = dispAttr.Description;
 	  }
 	  else _description = descriptor.Description; 
 	  
 	  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName))
 	  {
-		try   { _categoryName = dispAttr.GetGroupName(); } 
-		catch { _categoryName = dispAttr.GroupName; }  
+		if (dispAttr.ResourceType != null)
+		{
+		  try   { _categoryName = dispAttr.GetGroupName(); } 
+		  catch { _categoryName = dispAttr.GroupName; }
+		}
+		else _categoryName = dispAttr.GroupName; 
 	  }
 	  else _categoryName = descriptor.Category; 
 
@@ -217,8 +225,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	      string dispName;
 		  if (displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name))
 		  {
-			  try	{ dispName = displayAttr.GetName(); }
-			  catch { dispName = displayAttr.Name; } 
+			  if (displayAttr.ResourceType != null)
+			  {
+			    try	{ dispName = displayAttr.GetName(); }
+			    catch { dispName = displayAttr.Name; } 
+			  }
+			  else dispName = displayAttr.Name;
 		  }
 		  else dispName =  _descriptor.DisplayName;
 
