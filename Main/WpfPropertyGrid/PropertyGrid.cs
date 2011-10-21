@@ -449,12 +449,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
       get { return (Control)GetValue(LayoutProperty); }
       set { SetValue(LayoutProperty, value); }
     }
-
-
-    /// <summary>
+	
+	/// <summary>
     /// Gets or sets the selected object.
     /// </summary>
     /// <value>The selected object.</value>
+    
     public object SelectedObject
     {
       get { return (currentObjects != null && currentObjects.Length != 0) ? currentObjects[0] : null; }
@@ -928,7 +928,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
         {
 		  // dmh - hack for no given DisplayAttribute making Misc end up in refused categories, a default Category is assigned elsewhere or somethign
 		  var displayAttr = property.GetAttribute<DisplayAttribute>();
-          category = CreateCategory(displayAttr ?? new DisplayAttribute { GroupName = property.CategoryName });
+		  if (displayAttr == null || string.IsNullOrEmpty(displayAttr.GroupName))
+			  category = CreateCategory(new DisplayAttribute { GroupName = property.CategoryName });
+		  else
+			category = CreateCategory(displayAttr);
 
           if (category == null)
           {
@@ -936,11 +939,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
             continue;
           }
 
-		  /* !!! dmh - this is not needed here! fixed creating a catagory using GetGroupName() to use localized string
-		  var dispAttr = (DisplayAttribute)property.Attributes[typeof(DisplayAttribute)];
-		  if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName))
-            categories[dispAttr.GetGroupName()] = category;
-		  else */
 		  categories[category.Name] = category;
         }
 
