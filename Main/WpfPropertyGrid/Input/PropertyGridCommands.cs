@@ -17,90 +17,88 @@ using System.Windows.Input;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
-  /// <summary>
-  /// Provides a standard set of property grid related commands.
-  /// </summary>
-  public static class PropertyGridCommands
-  {
-    #region Fields
-    private static readonly Type ThisType = typeof(PropertyGridCommands);
-    #endregion
-        
-    #region Commands
+	/// <summary>
+	/// Provides a standard set of property grid related commands.
+	/// </summary>
+	public static class PropertyGridCommands
+	{
+		private static readonly Type thisType = typeof(PropertyGridCommands);
 
-    private static readonly RoutedUICommand _ShowFilter = new RoutedUICommand("Show Filter", "ShowFilter", ThisType);
-    private static readonly RoutedUICommand _HideFilter = new RoutedUICommand("Hide Filter", "HideFilter", ThisType);
-    private static readonly RoutedUICommand _ToggleFilter = new RoutedUICommand("Toggle Filter", "ToggleFilter", ThisType);
-    private static readonly RoutedUICommand _ResetFilter = new RoutedUICommand("Reset Filter", "ResetFilter", ThisType);
-    private static readonly RoutedUICommand _Reload = new RoutedUICommand("Reload", "Reload", ThisType);
-    private static readonly RoutedUICommand _ShowReadOnlyProperties = new RoutedUICommand("Show Read-Only Properties", "ShowReadOnlyProperties", ThisType);
-    private static readonly RoutedUICommand _HideReadOnlyProperties = new RoutedUICommand("Hide Read-Only Properties", "HideReadOnlyProperties", ThisType);
-    private static readonly RoutedUICommand _ToggleReadOnlyProperties = new RoutedUICommand("Toggle Read-Only Properties", "ToggleReadOnlyProperties", ThisType);
-    private static readonly RoutedUICommand _ShowAttachedProperties = new RoutedUICommand("Show Attached Properties", "ShowAttachedProperties", ThisType);
-    private static readonly RoutedUICommand _HideAttachedProperties = new RoutedUICommand("Hide Attached Properties", "HideAttachedProperties", ThisType);
-    private static readonly RoutedUICommand _ToggleAttachedProperties = new RoutedUICommand("Toggle Attached Properties", "ToggleAttachedProperties", ThisType);
-    private static readonly RoutedUICommand _ClosePropertyTab = new RoutedUICommand("Close Property Tab", "ClosePropertyTabCommand", ThisType);
+		#region Commands
 
-    /// <summary>
-    /// Represents a command for the control to show property filter box.
-    /// </summary>
-    public static RoutedUICommand ShowFilter { get { return _ShowFilter; } }
+		private static readonly RoutedUICommand showFilter					= new RoutedUICommand("Show Filter",					"ShowFilter",					thisType);
+		private static readonly RoutedUICommand hideFilter					= new RoutedUICommand("Hide Filter",					"HideFilter",					thisType);
+		private static readonly RoutedUICommand toggleFilter				= new RoutedUICommand("Toggle Filter",					"ToggleFilter",					thisType);
+		private static readonly RoutedUICommand resetFilter					= new RoutedUICommand("Reset Filter",					"ResetFilter",					thisType);
+		private static readonly RoutedUICommand reload						= new RoutedUICommand("Reload",							"Reload",						thisType);
+		private static readonly RoutedUICommand showReadOnlyProperties		= new RoutedUICommand("Show Read-Only Properties",		"ShowReadOnlyProperties",		thisType);
+		private static readonly RoutedUICommand hideReadOnlyProperties		= new RoutedUICommand("Hide Read-Only Properties",		"HideReadOnlyProperties",		thisType);
+		private static readonly RoutedUICommand toggleReadOnlyProperties	= new RoutedUICommand("Toggle Read-Only Properties",	"ToggleReadOnlyProperties",		thisType);
+		private static readonly RoutedUICommand showAttachedProperties		= new RoutedUICommand("Show Attached Properties",		"ShowAttachedProperties",		thisType);
+		private static readonly RoutedUICommand hideAttachedProperties		= new RoutedUICommand("Hide Attached Properties",		"HideAttachedProperties",		thisType);
+		private static readonly RoutedUICommand toggleAttachedProperties	= new RoutedUICommand("Toggle Attached Properties",		"ToggleAttachedProperties",		thisType);
+		private static readonly RoutedUICommand closePropertyTab			= new RoutedUICommand("Close Property Tab",				"ClosePropertyTabCommand",		thisType);
 
-    /// <summary>
-    /// Represents a command for the control to hide property filter box.
-    /// </summary>
-    public static RoutedUICommand HideFilter { get { return _HideFilter; } }
+		/// <summary>
+		/// Represents a command for the control to show property filter box.
+		/// </summary>
+		public static RoutedUICommand ShowFilter { get { return showFilter; } }
 
-    /// <summary>
-    /// Represents a command for the control to toggle visibility of property filter box.
-    /// </summary>
-    public static RoutedUICommand ToggleFilter { get { return _ToggleFilter; } }
+		/// <summary>
+		/// Represents a command for the control to hide property filter box.
+		/// </summary>
+		public static RoutedUICommand HideFilter { get { return hideFilter; } }
 
-    /// <summary>
-    /// Represents a command that resets current grid filter.
-    /// </summary>
-    public static RoutedUICommand ResetFilter { get { return _ResetFilter; } }    
+		/// <summary>
+		/// Represents a command for the control to toggle visibility of property filter box.
+		/// </summary>
+		public static RoutedUICommand ToggleFilter { get { return toggleFilter; } }
 
-    /// <summary>
-    /// Represents a command that reloads current grid properties.
-    /// </summary>
-    public static RoutedUICommand Reload { get { return _Reload; } }
-        
-    /// <summary>
-    /// Represents a command for the control to show all read-only properties.
-    /// </summary>
-    public static RoutedUICommand ShowReadOnlyProperties { get { return _ShowReadOnlyProperties; } }
+		/// <summary>
+		/// Represents a command that resets current grid filter.
+		/// </summary>
+		public static RoutedUICommand ResetFilter { get { return resetFilter; } }
 
-    /// <summary>
-    /// Represetns a command for the control to hide all read-only properties.
-    /// </summary>
-    public static RoutedUICommand HideReadOnlyProperties { get { return _HideReadOnlyProperties; } }
+		/// <summary>
+		/// Represents a command that reloads current grid properties.
+		/// </summary>
+		public static RoutedUICommand Reload { get { return reload; } }
 
-    /// <summary>
-    /// Represents a command for the control to toggle visibility of read-only properties.
-    /// </summary>
-    public static RoutedUICommand ToggleReadOnlyProperties { get { return _ToggleReadOnlyProperties; } }
+		/// <summary>
+		/// Represents a command for the control to show all read-only properties.
+		/// </summary>
+		public static RoutedUICommand ShowReadOnlyProperties { get { return showReadOnlyProperties; } }
 
-    /// <summary>
-    /// Represents a command for the control to show all attached properties.
-    /// </summary>
-    public static RoutedUICommand ShowAttachedProperties { get { return _ShowAttachedProperties; } }
+		/// <summary>
+		/// Represetns a command for the control to hide all read-only properties.
+		/// </summary>
+		public static RoutedUICommand HideReadOnlyProperties { get { return hideReadOnlyProperties; } }
 
-    /// <summary>
-    /// Represents a command for the control to hide all attached properties.
-    /// </summary>
-    public static RoutedUICommand HideAttachedProperties { get { return _HideAttachedProperties; } }
+		/// <summary>
+		/// Represents a command for the control to toggle visibility of read-only properties.
+		/// </summary>
+		public static RoutedUICommand ToggleReadOnlyProperties { get { return toggleReadOnlyProperties; } }
 
-    /// <summary>
-    /// Represents a command for the control to toggle visibility of attached properties.
-    /// </summary>
-    public static RoutedUICommand ToggleAttachedProperties { get { return _ToggleAttachedProperties; } }
+		/// <summary>
+		/// Represents a command for the control to show all attached properties.
+		/// </summary>
+		public static RoutedUICommand ShowAttachedProperties { get { return showAttachedProperties; } }
 
-    /// <summary>
-    /// Represents a command for the control to close active property tab.
-    /// </summary>
-    public static RoutedUICommand ClosePropertyTab { get { return _ClosePropertyTab; } }
+		/// <summary>
+		/// Represents a command for the control to hide all attached properties.
+		/// </summary>
+		public static RoutedUICommand HideAttachedProperties { get { return hideAttachedProperties; } }
 
-    #endregion
-  }
+		/// <summary>
+		/// Represents a command for the control to toggle visibility of attached properties.
+		/// </summary>
+		public static RoutedUICommand ToggleAttachedProperties { get { return toggleAttachedProperties; } }
+
+		/// <summary>
+		/// Represents a command for the control to close active property tab.
+		/// </summary>
+		public static RoutedUICommand ClosePropertyTab { get { return closePropertyTab; } }
+
+		#endregion
+	}
 }

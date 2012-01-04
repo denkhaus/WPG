@@ -45,7 +45,7 @@
       IsEnabled="{Binding IsEditable}">
       <ComboBox.ItemTemplate>
         <DataTemplate>
-          <TextBlock Text="{Binding Path=., Converter={StaticResource enumValueConverter}}" />
+			<TextBlock Text="{Binding Path=., Converter={StaticResource enumValueConverter}}"><TextBlock> !!! Default EnumEditor !!!</TextBlock></TextBlock>				
         </DataTemplate>
       </ComboBox.ItemTemplate>
     </controls:EnumDropdown>

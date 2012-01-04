@@ -29,7 +29,7 @@ namespace WpfPropertyGrid.UnitTests
         base.Dispose(disposing);
       }
 
-      public CategoryItemMock() : base(new PropertyGrid(), new CategoryAttribute()) { }
+      public CategoryItemMock() : base(new PropertyGrid(), new DisplayAttribute()) { }
     }
 
     private class PropertyItemMock : PropertyItem

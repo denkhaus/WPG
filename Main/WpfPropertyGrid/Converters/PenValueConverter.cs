@@ -16,20 +16,12 @@
 
 using System.Globalization;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
-	/// <summary>
-	/// Expander header width converter
-	/// </summary>
-	// For more details see http://joshsmithonwpf.wordpress.com/2007/02/24/stretching-content-in-an-expander-header/
-	public sealed class ExpanderHeaderWidthConverter : IValueConverter
+	public class PenValueConverter : IValueConverter
 	{
-		/// <summary>
-		/// Specifies the default offset that should be used in case no parameter is provided. By default is -25.0
-		/// </summary>
-		public const double DefaultOffset = -25.0;
-
 		#region IValueConverter Members
 
 		/// <summary>
@@ -44,12 +36,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// </returns>
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			double width = (double)value;
-			double diff;
-			if (parameter != null && double.TryParse(parameter.ToString(), out diff))
-				return width + diff;
-
-			return width + DefaultOffset;
+			Pen pen = value as Pen;
+			if (pen == null) return null;
+			return string.Format("{0} {1}", pen.DashStyle.Dashes, pen.Thickness);
 		}
 
 		/// <summary>
@@ -64,12 +53,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// </returns>
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			double width = (double)value;
-			double diff;
-			if (parameter != null && double.TryParse(parameter.ToString(), out diff))
-				return width - diff;
-
-			return width - DefaultOffset;
+			return null;
 		}
 
 		#endregion

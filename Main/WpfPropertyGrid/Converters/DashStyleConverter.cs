@@ -16,20 +16,15 @@
 
 using System.Globalization;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
 	/// <summary>
-	/// Expander header width converter
+	/// Converts a null value into a string representation.
 	/// </summary>
-	// For more details see http://joshsmithonwpf.wordpress.com/2007/02/24/stretching-content-in-an-expander-header/
-	public sealed class ExpanderHeaderWidthConverter : IValueConverter
+	public class DashStyleConverter : IValueConverter
 	{
-		/// <summary>
-		/// Specifies the default offset that should be used in case no parameter is provided. By default is -25.0
-		/// </summary>
-		public const double DefaultOffset = -25.0;
-
 		#region IValueConverter Members
 
 		/// <summary>
@@ -44,12 +39,21 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// </returns>
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			double width = (double)value;
-			double diff;
-			if (parameter != null && double.TryParse(parameter.ToString(), out diff))
-				return width + diff;
+			DashStyle dash = value as DashStyle;
+			if (dash == null) return null;
 
-			return width + DefaultOffset;
+			if (dash == DashStyles.Dot)
+				return "Dot";
+			if (dash == DashStyles.Dash)
+				return "Dash";
+			if (dash == DashStyles.DashDot)
+				return "Dash Dot";
+			if (dash == DashStyles.DashDotDot)
+				return "Dash Dot Dot";
+			if (dash == DashStyles.Solid)
+				return "Solid";
+
+			return dash.Dashes.ToString();
 		}
 
 		/// <summary>
@@ -64,12 +68,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// </returns>
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			double width = (double)value;
-			double diff;
-			if (parameter != null && double.TryParse(parameter.ToString(), out diff))
-				return width - diff;
-
-			return width - DefaultOffset;
+			return null;
 		}
 
 		#endregion

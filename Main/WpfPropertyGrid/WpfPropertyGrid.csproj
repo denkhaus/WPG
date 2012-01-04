@@ -98,61 +98,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Design\AlphabeticalLayout.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Design\CategorizedLayout.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Design\TabbedLayout.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\EditorResources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\DoubleEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\PropertyGrid.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\SearchTextBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="CategoryEditor.cs" />
     <Compile Include="CategoryItem.cs" />
+    <Compile Include="Controls\BrushListProvider.cs" />
+    <Compile Include="Controls\BrushPicker.xaml.cs">
+      <DependentUpon>BrushPicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SliderEditorBase.cs" />
-    <Compile Include="Converters\DebugConverter.cs" />
-    <Compile Include="Converters\EnumValueConverter.cs" />
+    <Compile Include="Converters\IsExpandableObjectConverter.cs" />
+    <Compile Include="Converters\DashStyleConverter.cs" />
+    <Compile Include="Converters\PenValueConverter.cs" />
     <Compile Include="Converters\ExpanderHeaderWidthConverter.cs" />
     <Compile Include="Converters\FontConverterDecorator.cs" />
     <Compile Include="Converters\FontStretchConverterDecorator.cs" />
@@ -177,16 +132,19 @@
     <Compile Include="Design\PropertyNameTextBlock.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorKeys.cs" />
+    <Compile Include="FontInfo.cs" />
     <Compile Include="GridEntryCollection.cs" />
     <Compile Include="KnownTypes.cs" />
     <Compile Include="Metadata\CategoryEditorAttribute.cs" />
     <Compile Include="Metadata\CategoryOrderAttribute.cs" />
     <Compile Include="Metadata\PropertyEditorAttribute.cs" />
     <Compile Include="MetadataRepository.cs" />
+    <Compile Include="PropertyEditing\DashStyleList.cs" />
+    <Compile Include="Controls\BrushSelector.cs" />
     <Compile Include="PropertyEditingEventArgs.cs" />
     <Compile Include="PropertyEditing\Filters\PropertyFilterAppliedEventArgs.cs" />
-    <Compile Include="PropertyEditing\NamedColor.cs" />
-    <Compile Include="PropertyEditing\NamedColorList.cs" />
+    <Compile Include="PropertyEditing\NamedBrush.cs" />
+    <Compile Include="PropertyEditing\NamedBrushList.cs" />
     <Compile Include="PropertyEditor.cs" />
     <Compile Include="GridEntry.cs" />
     <Compile Include="ResourceLocator.cs" />
@@ -274,6 +232,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="License.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Controls\BrushPicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

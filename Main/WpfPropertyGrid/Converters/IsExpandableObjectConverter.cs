@@ -13,12 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+using System.ComponentModel;
+using System.Globalization;
+using System.Windows.Data;
+
 namespace System.Windows.Controls.WpfPropertyGrid
 {
 	/// <summary>
-	/// Specifies whether the property hierarchy should be flatterned for visualization.
+	/// Value converter that can be used for editor debugging purposes.   
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-	[Obsolete("This attribute is deprecated and is no longer supported by PropertyGrid. Please consider using custom type descriptors or ModelView classes in order to gain flattern behavior.", false)]
-	public sealed class FlatternHierarchyAttribute : Attribute { }
+	public class IsExpandableObjectConverter : IValueConverter
+	{
+		#region IValueConverter Members
+
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return value is ExpandableObjectConverter;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return null;
+		}
+
+		#endregion
+	}
 }

@@ -13,479 +13,476 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace System.Windows.Controls.WpfPropertyGrid.Internal
 {
-  [DebuggerDisplay("{Name}")]
-  internal class MergedPropertyDescriptor : PropertyDescriptor
-  {
-    // Fields
-    private TriState canReset;
-    private MultiMergeCollection collection;
-    private PropertyDescriptor[] descriptors;
-    private TriState localizable;
-    private TriState readOnly;
-    private Hashtable handlers;
-    private bool internalValueSet = false;
+	[DebuggerDisplay("{Name}")]
+	internal class MergedPropertyDescriptor : PropertyDescriptor
+	{
+		// Fields
+		private				TriState				canReset;
+		private				MultiMergeCollection	collection;
+		private readonly	PropertyDescriptor[]	descriptors;
+		private				Hashtable				handlers;
+		private				bool					internalValueSet;
+		private				TriState				localizable;
+		private				TriState				readOnly;
 
 
-    // Methods
-    public MergedPropertyDescriptor(PropertyDescriptor[] descriptors)
-      : base(descriptors[0].Name, null)
-    {
-      this.descriptors = descriptors;
-    }
+		// Methods
+		public MergedPropertyDescriptor(PropertyDescriptor[] descriptors) : base(descriptors[0].Name, null)
+		{
+			this.descriptors = descriptors;
+		}
 
-    public sealed override void AddValueChanged(object component, EventHandler handler)
-    {
-      if (component == null) throw new ArgumentNullException("component");
-      if (handler == null) throw new ArgumentNullException("handler");
+		public override Type ComponentType
+		{
+			get { return descriptors[0].ComponentType; }
+		}
 
-      Array targets = component as Array;
-      if (targets == null) throw new ArgumentException("Descriptor expects an array of objects!");
+		public override TypeConverter Converter
+		{
+			get { return descriptors[0].Converter; }
+		}
 
-      if (handlers == null) handlers = new Hashtable();
+		public override string DisplayName
+		{
+			get { return descriptors[0].DisplayName; }
+		}
 
-      for (int i = 0; i < descriptors.Length; i++)
-      {
-        object target = targets.GetValue(i);
+		public override bool IsLocalizable
+		{
+			get
+			{
+				if (localizable == TriState.Unknown)
+				{
+					localizable = TriState.Yes;
+					foreach (PropertyDescriptor descriptor in descriptors)
+						if (!descriptor.IsLocalizable)
+						{
+							localizable = TriState.No;
+							break;
+						}
+				}
+				return (localizable == TriState.Yes);
+			}
+		}
 
-        descriptors[i].AddValueChanged(target, OnValueChanged);
-        EventHandler h = (EventHandler)this.handlers[target];
-        this.handlers[target] = Delegate.Combine(h, handler);
-      }
-    }
+		public override bool IsReadOnly
+		{
+			get
+			{
+				if (readOnly == TriState.Unknown)
+				{
+					readOnly = TriState.No;
+					foreach (PropertyDescriptor descriptor in descriptors)
+					{
+						if (descriptor.IsReadOnly)
+						{
+							readOnly = TriState.Yes;
+							break;
+						}
+					}
+				}
+				return (readOnly == TriState.Yes);
+			}
+		}
 
-    public sealed override void RemoveValueChanged(object component, EventHandler handler)
-    {
-      if (component == null) throw new ArgumentNullException("component");
-      if (handler == null) throw new ArgumentNullException("handler");
+		public PropertyDescriptor this[int index]
+		{
+			get { return descriptors[index]; }
+		}
 
-      Array targets = component as Array;
-      if (targets == null) throw new ArgumentException("Descriptor expects an array of objects!");
+		public override Type PropertyType
+		{
+			get { return descriptors[0].PropertyType; }
+		}
 
-      for (int i = 0; i < descriptors.Length; i++)
-      {
-        object target = targets.GetValue(i);
+		public override sealed void AddValueChanged(object component, EventHandler handler)
+		{
+			if (component == null) throw new ArgumentNullException("component");
+			if (handler == null) throw new ArgumentNullException("handler");
 
-        descriptors[i].AddValueChanged(target, OnValueChanged);
-        if (handlers != null)
-        {
-          EventHandler h = (EventHandler)this.handlers[target];
-          h = (EventHandler)Delegate.Remove(h, handler);
+			var targets = component as Array;
+			if (targets == null) throw new ArgumentException("Descriptor expects an array of objects!");
 
-          if (h != null)
-            this.handlers[target] = h;
-          else
-            this.handlers.Remove(target);
-        }
-      }
-    }
+			if (handlers == null) handlers = new Hashtable();
 
-    protected override void OnValueChanged(object component, EventArgs e)
-    {
-      if (internalValueSet) return;
+			for (int i = 0; i < descriptors.Length; i++)
+			{
+				object target = targets.GetValue(i);
 
-      if (component != null && this.handlers != null)
-      {
-        EventHandler handler = (EventHandler)this.handlers[component];
-        if (handler != null)
-          handler(component, e);
-      }
-    }
+				descriptors[i].AddValueChanged(target, OnValueChanged);
+				var h = (EventHandler) handlers[target];
+				handlers[target] = Delegate.Combine(h, handler);
+			}
+		}
 
-    public override bool CanResetValue(object component)
-    {
-      if (this.canReset == TriState.Unknown)
-      {
-        this.canReset = TriState.Yes;
-        Array a = (Array)component;
-        for (int i = 0; i < this.descriptors.Length; i++)
-        {
-          if (!this.descriptors[i].CanResetValue(this.GetPropertyOwnerForComponent(a, i)))
-          {
-            this.canReset = TriState.No;
-            break;
-          }
-        }
-      }
-      return (this.canReset == TriState.Yes);
-    }
+		public override sealed void RemoveValueChanged(object component, EventHandler handler)
+		{
+			if (component == null) throw new ArgumentNullException("component");
+			if (handler == null) throw new ArgumentNullException("handler");
 
-    private object CopyValue(object value)
-    {
-      if (value != null)
-      {
-        Type type = value.GetType();
-        if (type.IsValueType)
-        {
-          return value;
-        }
-        object obj2 = null;
-        ICloneable cloneable = value as ICloneable;
-        if (cloneable != null)
-        {
-          obj2 = cloneable.Clone();
-        }
-        if (obj2 == null)
-        {
-          // TODO: Reuse ObjectServices here?
-          TypeConverter converter = TypeDescriptor.GetConverter(value);
-          if (converter.CanConvertTo(typeof(InstanceDescriptor)))
-          {
-            InstanceDescriptor descriptor = (InstanceDescriptor)converter.ConvertTo(null, CultureInfo.InvariantCulture, value, typeof(InstanceDescriptor));
-            if ((descriptor != null) && descriptor.IsComplete)
-            {
-              obj2 = descriptor.Invoke();
-            }
-          }
-          if (((obj2 == null) && converter.CanConvertTo(typeof(string))) && converter.CanConvertFrom(typeof(string)))
-          {
-            object obj3 = converter.ConvertToInvariantString(value);
-            obj2 = converter.ConvertFromInvariantString((string)obj3);
-          }
-        }
-        if ((obj2 == null) && type.IsSerializable)
-        {
-          BinaryFormatter formatter = new BinaryFormatter();
-          MemoryStream serializationStream = new MemoryStream();
-          formatter.Serialize(serializationStream, value);
-          serializationStream.Position = 0L;
-          obj2 = formatter.Deserialize(serializationStream);
-        }
-        if (obj2 != null)
-        {
-          return obj2;
-        }
-      }
-      return value;
-    }
+			var targets = component as Array;
+			if (targets == null) throw new ArgumentException("Descriptor expects an array of objects!");
 
-    protected override AttributeCollection CreateAttributeCollection()
-    {
-      IEnumerable<Attribute> attributes = null;
-      Attribute[] buffer = null;
+			for (int i = 0; i < descriptors.Length; i++)
+			{
+				object target = targets.GetValue(i);
 
-      foreach (PropertyDescriptor descriptor in descriptors)
-      {
-        buffer = new Attribute[descriptor.Attributes.Count];
-        descriptor.Attributes.CopyTo(buffer, 0);
-        attributes = (attributes == null) ? buffer : attributes.Intersect(buffer);
-      }
+				descriptors[i].AddValueChanged(target, OnValueChanged);
+				if (handlers != null)
+				{
+					var h = (EventHandler) handlers[target];
+					h = (EventHandler) Delegate.Remove(h, handler);
 
-      return new AttributeCollection(attributes.ToArray());
-    }
+					if (h != null)
+						handlers[target] = h;
+					else
+						handlers.Remove(target);
+				}
+			}
+		}
 
-    public override object GetEditor(Type editorBaseType)
-    {
-      return this.descriptors[0].GetEditor(editorBaseType);
-    }
+		protected override void OnValueChanged(object component, EventArgs e)
+		{
+			if (internalValueSet) return;
 
-    private object GetPropertyOwnerForComponent(Array a, int i)
-    {
-      object propertyOwner = a.GetValue(i);
-      if (propertyOwner is ICustomTypeDescriptor)
-      {
-        propertyOwner = ((ICustomTypeDescriptor)propertyOwner).GetPropertyOwner(this.descriptors[i]);
-      }
-      return propertyOwner;
-    }
+			if (component != null && handlers != null)
+			{
+				var handler = (EventHandler) handlers[component];
+				if (handler != null)
+					handler(component, e);
+			}
+		}
 
-    public override object GetValue(object component)
-    {
-      bool flag;
-      return this.GetValue((Array)component, out flag);
-    }
+		public override bool CanResetValue(object component)
+		{
+			if (canReset == TriState.Unknown)
+			{
+				canReset = TriState.Yes;
+				var a = (Array) component;
+				for (int i = 0; i < descriptors.Length; i++)
+				{
+					if (!descriptors[i].CanResetValue(GetPropertyOwnerForComponent(a, i)))
+					{
+						canReset = TriState.No;
+						break;
+					}
+				}
+			}
+			return (canReset == TriState.Yes);
+		}
 
-    public object GetValue(Array components, out bool allEqual)
-    {
-      allEqual = true;
-      object obj2 = this.descriptors[0].GetValue(this.GetPropertyOwnerForComponent(components, 0));
-      if (obj2 is ICollection)
-      {
-        if (this.collection == null)
-          this.collection = new MultiMergeCollection((ICollection)obj2);
-        else
-        {
-          if (this.collection.Locked)
-            return this.collection;
+		private object CopyValue(object value)
+		{
+			if (value != null)
+			{
+				Type type = value.GetType();
+				if (type.IsValueType)
+				{
+					return value;
+				}
+				object obj2 = null;
+				var cloneable = value as ICloneable;
+				if (cloneable != null)
+					obj2 = cloneable.Clone();
+				if (obj2 == null)
+				{
+					// TODO: Reuse ObjectServices here?
+					TypeConverter converter = TypeDescriptor.GetConverter(value);
+					if (converter.CanConvertTo(typeof (InstanceDescriptor)))
+					{
+						var descriptor =
+							(InstanceDescriptor) converter.ConvertTo(null, CultureInfo.InvariantCulture, value, typeof (InstanceDescriptor));
+						if ((descriptor != null) && descriptor.IsComplete)
+							obj2 = descriptor.Invoke();
+					}
+					if (obj2 == null && converter.CanConvertTo(typeof(string)) && converter.CanConvertFrom(typeof(string)))
+					{
+						object obj3 = converter.ConvertToInvariantString(value);
+						obj2 = converter.ConvertFromInvariantString((string) obj3);
+					}
+				}
+				if ((obj2 == null) && type.IsSerializable)
+				{
+					var formatter = new BinaryFormatter();
+					var serializationStream = new MemoryStream();
+					formatter.Serialize(serializationStream, value);
+					serializationStream.Position = 0L;
+					obj2 = formatter.Deserialize(serializationStream);
+				}
+				if (obj2 != null)
+					return obj2;
+			}
+			return value;
+		}
 
-          this.collection.SetItems((ICollection)obj2);
-        }
-      }
-      for (int i = 1; i < this.descriptors.Length; i++)
-      {
-        object obj3 = this.descriptors[i].GetValue(this.GetPropertyOwnerForComponent(components, i));
-        if (this.collection != null)
-        {
-          if (!this.collection.MergeCollection((ICollection)obj3))
-          {
-            allEqual = false;
-            return null;
-          }
-        }
-        else if (((obj2 != null) || (obj3 != null)) && ((obj2 == null) || !obj2.Equals(obj3)))
-        {
-          allEqual = false;
-          return null;
-        }
-      }
+		protected override AttributeCollection CreateAttributeCollection()
+		{
+			IEnumerable<Attribute> attributes = null;
 
-      if ((allEqual && (this.collection != null)) && (this.collection.Count == 0))
-        return null;
+			foreach (PropertyDescriptor descriptor in descriptors)
+			{
+				Attribute[] buffer = new Attribute[descriptor.Attributes.Count];
+				descriptor.Attributes.CopyTo(buffer, 0);
+				attributes = (attributes == null) ? buffer : attributes.Intersect(buffer);
+			}
 
-      if (this.collection == null)
-        return obj2;
+			return new AttributeCollection(attributes.ToArray());
+		}
 
-      return this.collection;
-    }
+		public override object GetEditor(Type editorBaseType)
+		{
+			return descriptors[0].GetEditor(editorBaseType);
+		}
 
-    internal object[] GetValues(Array components)
-    {
-      object[] objArray = new object[components.Length];
+		private object GetPropertyOwnerForComponent(Array a, int i)
+		{
+			object propertyOwner = a.GetValue(i);
+			if (propertyOwner is ICustomTypeDescriptor)
+			{
+				propertyOwner = ((ICustomTypeDescriptor) propertyOwner).GetPropertyOwner(descriptors[i]);
+			}
+			return propertyOwner;
+		}
 
-      for (int i = 0; i < components.Length; i++)
-        objArray[i] = this.descriptors[i].GetValue(this.GetPropertyOwnerForComponent(components, i));
+		public override object GetValue(object component)
+		{
+			bool flag;
+			return GetValue((Array) component, out flag);
+		}
 
-      return objArray;
-    }
+		public object GetValue(Array components, out bool allEqual)
+		{
+			allEqual = true;
+			object obj2 = descriptors[0].GetValue(GetPropertyOwnerForComponent(components, 0));
+			if (obj2 is ICollection)
+			{
+				if (collection == null)
+					collection = new MultiMergeCollection((ICollection) obj2);
+				else
+				{
+					if (collection.Locked)
+						return collection;
 
-    public override void ResetValue(object component)
-    {
-      Array a = (Array)component;
+					collection.SetItems((ICollection) obj2);
+				}
+			}
+			for (int i = 1; i < descriptors.Length; i++)
+			{
+				object obj3 = descriptors[i].GetValue(GetPropertyOwnerForComponent(components, i));
+				if (collection != null)
+				{
+					if (!collection.MergeCollection((ICollection) obj3))
+					{
+						allEqual = false;
+						return null;
+					}
+				}
+				else if ((obj2 != null || obj3 != null) && (obj2 == null || !obj2.Equals(obj3)))
+				{
+					allEqual = false;
+					return null;
+				}
+			}
 
-      for (int i = 0; i < this.descriptors.Length; i++)
-        this.descriptors[i].ResetValue(this.GetPropertyOwnerForComponent(a, i));
-    }
+			if (collection != null && collection.Count == 0)
+				return null;
 
-    private void SetCollectionValues(Array a, IList listValue)
-    {
-      try
-      {
-        if (this.collection != null)
-          this.collection.Locked = true;
+			if (collection == null)
+				return obj2;
 
-        object[] array = new object[listValue.Count];
-        listValue.CopyTo(array, 0);
-        for (int i = 0; i < this.descriptors.Length; i++)
-        {
-          IList list = this.descriptors[i].GetValue(this.GetPropertyOwnerForComponent(a, i)) as IList;
-          if (list != null)
-          {
-            list.Clear();
-            foreach (object obj2 in array)
-              list.Add(obj2);
-          }
-        }
-      }
-      finally
-      {
-        if (this.collection != null)
-          this.collection.Locked = false;
-      }
-    }
+			return collection;
+		}
 
-    public override void SetValue(object component, object value)
-    {
-      Array a = (Array)component;
+		internal object[] GetValues(Array components)
+		{
+			var objArray = new object[components.Length];
 
-      if ((value is IList) && typeof(IList).IsAssignableFrom(this.PropertyType))
-      {
-        //TODO: Check whether internalValueSet should be configured here too...
-        this.SetCollectionValues(a, (IList)value);
-      }
-      else
-      {
-        internalValueSet = true;
-        for (int i = 0; i < this.descriptors.Length; i++)
-        {
-          object obj2 = this.CopyValue(value);          
-          object owner = this.GetPropertyOwnerForComponent(a, i);
-          this.descriptors[i].SetValue(owner, obj2);
-          
-          //OnValueChanged(owner, new PropertyChangedEventArgs(descriptors[i].Name));
-        }
-        internalValueSet = false;
-        OnValueChanged(component, new PropertyChangedEventArgs(this.Name));
-      }
-    }
+			for (int i = 0; i < components.Length; i++)
+				objArray[i] = descriptors[i].GetValue(GetPropertyOwnerForComponent(components, i));
 
-    public override bool ShouldSerializeValue(object component)
-    {
-      Array a = (Array)component;
-      for (int i = 0; i < this.descriptors.Length; i++)
-      {
-        if (!this.descriptors[i].ShouldSerializeValue(this.GetPropertyOwnerForComponent(a, i)))
-          return false;
-      }
-      return true;
-    }
+			return objArray;
+		}
 
-    // Properties
-    public override Type ComponentType
-    {
-      get { return this.descriptors[0].ComponentType; }
-    }
+		public override void ResetValue(object component)
+		{
+			var a = (Array) component;
 
-    public override TypeConverter Converter
-    {
-      get { return this.descriptors[0].Converter; }
-    }
+			for (int i = 0; i < descriptors.Length; i++)
+				descriptors[i].ResetValue(GetPropertyOwnerForComponent(a, i));
+		}
 
-    public override string DisplayName
-    {
-      get { return this.descriptors[0].DisplayName; }
-    }
+		private void SetCollectionValues(Array a, ICollection listValue)
+		{
+			try
+			{
+				if (collection != null)
+					collection.Locked = true;
 
-    public override bool IsLocalizable
-    {
-      get
-      {
-        if (this.localizable == TriState.Unknown)
-        {
-          this.localizable = TriState.Yes;
-          foreach (PropertyDescriptor descriptor in this.descriptors)
-          {
-            if (!descriptor.IsLocalizable)
-            {
-              this.localizable = TriState.No;
-              break;
-            }
-          }
-        }
-        return (this.localizable == TriState.Yes);
-      }
-    }
+				var array = new object[listValue.Count];
+				listValue.CopyTo(array, 0);
+				for (int i = 0; i < descriptors.Length; i++)
+				{
+					var list = descriptors[i].GetValue(GetPropertyOwnerForComponent(a, i)) as IList;
+					if (list != null)
+					{
+						list.Clear();
+						foreach (object obj2 in array)
+							list.Add(obj2);
+					}
+				}
+			}
+			finally
+			{
+				if (collection != null)
+					collection.Locked = false;
+			}
+		}
 
-    public override bool IsReadOnly
-    {
-      get
-      {
-        if (this.readOnly == TriState.Unknown)
-        {
-          this.readOnly = TriState.No;
-          foreach (PropertyDescriptor descriptor in this.descriptors)
-          {
-            if (descriptor.IsReadOnly)
-            {
-              this.readOnly = TriState.Yes;
-              break;
-            }
-          }
-        }
-        return (this.readOnly == TriState.Yes);
-      }
-    }
+		public override void SetValue(object component, object value)
+		{
+			var a = (Array) component;
 
-    public PropertyDescriptor this[int index]
-    {
-      get { return this.descriptors[index]; }
-    }
+			if ((value is IList) && typeof (IList).IsAssignableFrom(PropertyType))
+			{
+				//TODO: Check whether internalValueSet should be configured here too...
+				SetCollectionValues(a, (IList) value);
+			}
+			else
+			{
+				internalValueSet = true;
+				for (int i = 0; i < descriptors.Length; i++)
+				{
+					object obj2 = CopyValue(value);
+					object owner = GetPropertyOwnerForComponent(a, i);
+					descriptors[i].SetValue(owner, obj2);
 
-    public override Type PropertyType
-    {
-      get { return this.descriptors[0].PropertyType; }
-    }
-        
-    private class MultiMergeCollection : ICollection, IEnumerable
-    {
-      private object[] items;
-      private bool locked;
+					//OnValueChanged(owner, new PropertyChangedEventArgs(descriptors[i].Name));
+				}
+				internalValueSet = false;
+				OnValueChanged(component, new PropertyChangedEventArgs(Name));
+			}
+		}
 
-      public MultiMergeCollection(ICollection original)
-      {
-        this.SetItems(original);
-      }
+		public override bool ShouldSerializeValue(object component)
+		{
+			var a = (Array) component;
+			return !descriptors.Where((t, i) => !t.ShouldSerializeValue(GetPropertyOwnerForComponent(a, i))).Any();
+		}
 
-      public void CopyTo(Array array, int index)
-      {
-        if (this.items != null)
-          Array.Copy(this.items, 0, array, index, this.items.Length);
-      }
+		// Properties
 
-      public IEnumerator GetEnumerator()
-      {
-        if (this.items != null)
-          return this.items.GetEnumerator();
+		#region Nested type: MultiMergeCollection
 
-        return new object[0].GetEnumerator();
-      }
+		private class MultiMergeCollection : ICollection
+		{
+			private object[] items;
+			private bool locked;
 
-      public bool MergeCollection(ICollection newCollection)
-      {
-        if (!this.locked)
-        {
-          if (this.items.Length != newCollection.Count)
-          {
-            this.items = new object[0];
-            return false;
-          }
+			public MultiMergeCollection(ICollection original)
+			{
+				SetItems(original);
+			}
 
-          object[] array = new object[newCollection.Count];
-          newCollection.CopyTo(array, 0);
-          for (int i = 0; i < array.Length; i++)
-          {
-            if (((array[i] == null) != (this.items[i] == null)) || ((this.items[i] != null) && !this.items[i].Equals(array[i])))
-            {
-              this.items = new object[0];
-              return false;
-            }
-          }
-        }
-        return true;
-      }
+			public bool Locked
+			{
+				get { return locked; }
+				set { locked = value; }
+			}
 
-      public void SetItems(ICollection collection)
-      {
-        if (!this.locked)
-        {
-          this.items = new object[collection.Count];
-          collection.CopyTo(this.items, 0);
-        }
-      }
+			#region ICollection Members
 
-      public int Count
-      {
-        get
-        {
-          if (this.items != null)
-            return this.items.Length;
+			public void CopyTo(Array array, int index)
+			{
+				if (items != null)
+					Array.Copy(items, 0, array, index, items.Length);
+			}
 
-          return 0;
-        }
-      }
+			public IEnumerator GetEnumerator()
+			{
+				if (items != null)
+					return items.GetEnumerator();
 
-      public bool Locked
-      {
-        get { return this.locked; }
-        set { this.locked = value; }
-      }
+				return new object[0].GetEnumerator();
+			}
 
-      bool ICollection.IsSynchronized
-      {
-        get { return false; }
-      }
+			public int Count
+			{
+				get
+				{
+					if (items != null)
+						return items.Length;
 
-      object ICollection.SyncRoot
-      {
-        get { return this; }
-      }
-    }
+					return 0;
+				}
+			}
 
-    private enum TriState
-    {
-      Unknown,
-      Yes,
-      No
-    }
-  }
+			bool ICollection.IsSynchronized
+			{
+				get { return false; }
+			}
+
+			object ICollection.SyncRoot
+			{
+				get { return this; }
+			}
+
+			#endregion
+
+			public bool MergeCollection(ICollection newCollection)
+			{
+				if (!locked)
+				{
+					if (items.Length != newCollection.Count)
+					{
+						items = new object[0];
+						return false;
+					}
+
+					var array = new object[newCollection.Count];
+					newCollection.CopyTo(array, 0);
+					if (array.Where((t, i) => (t == null) != (items[i] == null) || (items[i] != null && !items[i].Equals(t))).Any())
+					{
+						items = new object[0];
+						return false;
+					}
+				}
+				return true;
+			}
+
+			public void SetItems(ICollection collection)
+			{
+				if (!locked)
+				{
+					items = new object[collection.Count];
+					collection.CopyTo(items, 0);
+				}
+			}
+		}
+
+		#endregion
+
+		#region Nested type: TriState
+
+		private enum TriState
+		{
+			Unknown,
+			Yes,
+			No
+		}
+
+		#endregion
+	}
 }

@@ -17,30 +17,30 @@ using System.Windows.Input;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
-  /// <summary>
-  ///Provides a standard set of property editor related commands.
-  /// </summary>
-  public static class PropertyEditorCommands
-  {
-    private static readonly Type ThisType = typeof(PropertyEditorCommands);
-        
-    private static readonly RoutedUICommand _ShowDialogEditor = new RoutedUICommand("Show Dialog Editor", "ShowDialogEditorCommand", ThisType);
-    private static readonly RoutedUICommand _ShowExtendedEditor = new RoutedUICommand("Show Extended Editor", "ShowExtendedEditorCommand", ThisType);
+	/// <summary>
+	///Provides a standard set of property editor related commands.
+	/// </summary>
+	public static class PropertyEditorCommands
+	{
+		private static readonly Type thisType = typeof(PropertyEditorCommands);
 
-    /// <summary>
-    /// Defines a command to show dialog editor for a property.
-    /// </summary>    
-    public static RoutedUICommand ShowDialogEditor
-    {
-      get { return _ShowDialogEditor; }
-    }
+		private static readonly RoutedUICommand showDialogEditor	= new RoutedUICommand("Show Dialog Editor", "ShowDialogEditorCommand", thisType);
+		private static readonly RoutedUICommand showExtendedEditor	= new RoutedUICommand("Show Extended Editor", "ShowExtendedEditorCommand", thisType);
 
-    /// <summary>
-    /// Defines a command to show extended editor for a property.
-    /// </summary>
-    public static RoutedUICommand ShowExtendedEditor
-    {
-      get { return _ShowExtendedEditor; }
-    }
-  }
+		/// <summary>
+		/// Defines a command to show dialog editor for a property.
+		/// </summary>    
+		public static RoutedUICommand ShowDialogEditor
+		{
+			get { return showDialogEditor; }
+		}
+
+		/// <summary>
+		/// Defines a command to show extended editor for a property.
+		/// </summary>
+		public static RoutedUICommand ShowExtendedEditor
+		{
+			get { return showExtendedEditor; }
+		}
+	}
 }
