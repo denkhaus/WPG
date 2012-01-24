@@ -172,6 +172,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				else Name = category.GroupName;
 			}
 			Attribute = category;
+
+			// !!! dmh - be sure to get order from the display attribute for category as well.
+			try 
+			{ 
+				int? orderAttempt = category.GetOrder(); 
+				if (orderAttempt.HasValue)
+					order = orderAttempt.Value;
+			}
+			catch { }
 		}
 
 		#endregion
