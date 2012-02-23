@@ -22,7 +22,7 @@
     </SccAuxPath>
     <SccProvider>
     </SccProvider>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>WpfPropertyGrid.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -137,6 +137,8 @@
     <Compile Include="KnownTypes.cs" />
     <Compile Include="Metadata\CategoryEditorAttribute.cs" />
     <Compile Include="Metadata\CategoryOrderAttribute.cs" />
+    <Compile Include="Metadata\CategoryExpandedAttribute.cs" />
+    <Compile Include="Metadata\LocalizationResourceHelper.cs" />
     <Compile Include="Metadata\PropertyEditorAttribute.cs" />
     <Compile Include="MetadataRepository.cs" />
     <Compile Include="PropertyEditing\DashStyleList.cs" />
@@ -238,6 +240,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\NinjaTrader.Core\NinjaTrader.Core.csproj">
+      <Project>{D778943A-F570-43D4-B7D3-02237497B2B1}</Project>
+      <Name>NinjaTrader.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -51,7 +51,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <summary>
 		/// Identifies the <see cref="PropertyValueChanged"/> routed event.
 		/// </summary>
-		public static readonly RoutedEvent PropertyValueChangedEvent = EventManager.RegisterRoutedEvent("PropertyValueChanged", RoutingStrategy.Bubble, typeof (PropertyValueChangedEventHandler), thisType);
+		public static readonly RoutedEvent PropertyValueChangedEvent = EventManager.RegisterRoutedEvent("PropertyValueChanged", RoutingStrategy.Bubble, typeof(PropertyValueChangedEventHandler), thisType);
 
 		/// <summary>
 		/// Identifies the <see cref="ItemsBackground"/> dependency property.
@@ -556,7 +556,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 						refusedCategories.Add(property.CategoryName);
 						continue;
 					}
-
+				
 					categoryItems[category.Name] = category;
 				}
 
@@ -826,7 +826,17 @@ namespace System.Windows.Controls.WpfPropertyGrid
 						category.Order = orderAttribute.Order;
 				}
 
-				Categories = categoryItems; //new CategoryCollection(CollectCategories(properties));
+				// dmh - apply category default expanded state
+				IEnumerable<CategoryExpandedAttribute> categorysExpanded =
+					PropertyGridUtils.GetAttributes<CategoryExpandedAttribute>(SelectedObject);
+				foreach (CategoryExpandedAttribute expandedAttribute in categorysExpanded)
+				{
+					CategoryItem category = categoryItems[expandedAttribute.Category];
+					if (category != null)
+						category.IsExpanded = expandedAttribute.Expanded;
+				}
+
+				Categories = categoryItems; 
 				Properties = new GridEntryCollection<PropertyItem>(propertyItems);
 			}
 		}

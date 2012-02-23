@@ -21,6 +21,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	public sealed class CategoryEditorAttribute : Attribute
 	{
+		// dmh - localization support
+		private readonly Type resourceType;
+		private string categoryName;
+
 		/// <summary>
 		/// Gets or sets the type of the editor.
 		/// </summary>
@@ -31,7 +35,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// Gets or sets the name of the category.
 		/// </summary>
 		/// <value>The name of the category.</value>
-		public string CategoryName { get; private set; }
+		public string CategoryName 
+		{ 
+			// dmh - modified to support localization
+			get
+			{
+				return resourceType == null ? categoryName : LocalizationResourceHelper.LookupResource(resourceType, categoryName);
+			}
+			private set { categoryName = value; }
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CategoryEditorAttribute"/> class.
@@ -47,12 +59,23 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			CategoryName	= categoryName.ToUpperInvariant();
 		}
 
+		// dmh - constructor w/ type for localization resource manager
+		public CategoryEditorAttribute(Type resourceType, string categoryKeyName, string editorName) : this(categoryKeyName, editorName)
+		{
+			this.resourceType = resourceType;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CategoryEditorAttribute"/> class.
 		/// </summary>
 		/// <param name="categoryName">Name of the category.</param>
 		/// <param name="editorType">Type of the editor.</param>
 		public CategoryEditorAttribute(string categoryName, Type editorType) : this(categoryName, editorType.AssemblyQualifiedName) {}
+
+		public CategoryEditorAttribute(Type resourceType, string categoryKeyName, Type editorType) : this (categoryKeyName, editorType)
+		{
+			this.resourceType = resourceType;
+		}
 
 		/// <summary>
 		/// Returns the hash code for this instance.

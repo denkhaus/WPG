@@ -21,10 +21,22 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	public sealed class CategoryOrderAttribute : Attribute
 	{
+		// dmh - add localization support
+		private readonly Type resourceType;
+		private string categoryName;
+
 		/// <summary>
 		/// Gets the category name.
 		/// </summary>
-		public string Category { get; private set; }
+		public string Category 
+		{ 
+			// dmh - modified to support localization
+			get
+			{
+				return resourceType == null ? categoryName : LocalizationResourceHelper.LookupResource(resourceType, categoryName);
+			}
+			private set { categoryName = value; }
+		}
 
 		/// <summary>
 		/// Gets the category order.
@@ -39,6 +51,14 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <param name="order">The order.</param>
 		public CategoryOrderAttribute(string category, int order)
 		{
+			Category	= category;
+			Order		= order;
+		}
+
+		// dmh - add localization support
+		public CategoryOrderAttribute(Type resourceType, string category, int order)
+		{
+			this.resourceType = resourceType;
 			Category	= category;
 			Order		= order;
 		}
