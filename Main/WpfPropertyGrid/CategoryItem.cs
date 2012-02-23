@@ -174,6 +174,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			Attribute = category;
 
 			// !!! dmh - be sure to get order from the display attribute for category as well.
+			/* do not use order from display attribute for category! use CategoryOrderAttribute
 			try 
 			{ 
 				int? orderAttempt = category.GetOrder(); 
@@ -181,6 +182,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					order = orderAttempt.Value;
 			}
 			catch { }
+			*/
 		}
 
 		#endregion
