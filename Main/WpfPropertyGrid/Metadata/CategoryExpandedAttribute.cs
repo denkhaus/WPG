@@ -22,21 +22,33 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	public sealed class CategoryExpandedAttribute : Attribute
 	{
-		private readonly string categoryResourceName;
+		private readonly string categoryName;
 		private readonly Type resourceType;
 
-		public string Category { get { return LocalizationResourceHelper.LookupResource(resourceType, categoryResourceName); } }
+		public string Category 
+		{ 
+			get 
+			{ 
+				return resourceType != null ? LocalizationResourceHelper.LookupResource(resourceType, categoryName) : categoryName;
+			} 
+		}
+		
 		public bool Expanded { get; private set; }
 		
-		public CategoryExpandedAttribute(Type resourceType, string resourceName, bool expandedDefault)
+		// dmh - add public getter for resource type (FxCop)
+		public Type ResourceType { get { return resourceType; } }
+
+		public CategoryExpandedAttribute(Type resourceType, string category, bool expanded)
 		{
 			this.resourceType = resourceType;
-			categoryResourceName = resourceName;
-			Expanded = expandedDefault;
+			categoryName = category;
+			Expanded = expanded;
 		}
 
-		public CategoryExpandedAttribute(string categoryName, bool expandedDefault)
+		public CategoryExpandedAttribute(string category, bool expanded)
 		{
+			categoryName = category;
+			Expanded = expanded;
 		}
-	}	
+	}
 }

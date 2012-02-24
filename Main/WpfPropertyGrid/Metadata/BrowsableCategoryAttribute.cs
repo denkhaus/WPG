@@ -52,6 +52,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <value><c>true</c> if category should be displayed at run time; otherwise, <c>false</c>.</value>
 		public bool Browsable { get; private set; }
 
+		// dmh - add public getter for resource type (FxCop)
+		public Type ResourceType { get { return resourceType; } }
+
 		// dmh - localization support constructors
 		public BrowsableCategoryAttribute(Type resourceType, string categoryName, bool browsable) : this (categoryName, browsable)
 		{

@@ -45,6 +45,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			private set { categoryName = value; }
 		}
 
+		// dmh - add public getter for resource type (FxCop)
+		public Type ResourceType { get { return resourceType; } }
+		
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CategoryEditorAttribute"/> class.
 		/// </summary>
@@ -60,7 +63,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		}
 
 		// dmh - constructor w/ type for localization resource manager
-		public CategoryEditorAttribute(Type resourceType, string categoryKeyName, string editorName) : this(categoryKeyName, editorName)
+		public CategoryEditorAttribute(Type resourceType, string categoryName, string editorType) : this(categoryName, editorType)
 		{
 			this.resourceType = resourceType;
 		}
@@ -72,7 +75,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <param name="editorType">Type of the editor.</param>
 		public CategoryEditorAttribute(string categoryName, Type editorType) : this(categoryName, editorType.AssemblyQualifiedName) {}
 
-		public CategoryEditorAttribute(Type resourceType, string categoryKeyName, Type editorType) : this (categoryKeyName, editorType)
+		public CategoryEditorAttribute(Type resourceType, string categoryName, Type editorType) : this (categoryName, editorType)
 		{
 			this.resourceType = resourceType;
 		}

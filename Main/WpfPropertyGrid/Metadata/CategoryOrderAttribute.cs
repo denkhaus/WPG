@@ -44,6 +44,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <value>The order.</value>
 		public int Order { get; private set; }
 
+		// dmh - add public getter for resource type (FxCop)
+		public Type ResourceType { get { return resourceType; } }
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CategoryOrderAttribute"/> class.
 		/// </summary>
@@ -61,6 +64,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			this.resourceType = resourceType;
 			Category	= category;
 			Order		= order;
-		}
+		}		
 	}
 }

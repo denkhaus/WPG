@@ -19,7 +19,7 @@ using System.Reflection;
 namespace System.Windows.Controls.WpfPropertyGrid
 {
 	// dmh - added localization resource utility for localized versions of WPG attributes
-	static class LocalizationResourceHelper
+	static internal class LocalizationResourceHelper
 	{
 		public static string LookupResource(IReflect resourceManagerProvider, string resourceKey)
 		{
