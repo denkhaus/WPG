@@ -22,22 +22,46 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
 	public sealed class BrowsableCategoryAttribute : Attribute
 	{
+		// dmh - localization type
+		private readonly Type resourceType;
+
+		private string categoryName;
+
 		/// <summary>
 		/// Determines a wildcard for all categories to be affected.
 		/// </summary>
 		public const string All = "*";
 
 		/// <summary>
-		/// Gets the name of the category.
+		/// Gets the name of the category. 
 		/// </summary>
 		/// <value>The name of the category.</value>
-		public string CategoryName { get; private set; }
+		public string CategoryName 
+		{
+			// dmh - modified to support localized category name
+			get
+			{
+				return resourceType != null ? LocalizationResourceHelper.LookupResource(resourceType, categoryName) : categoryName;
+			}
+			private set { categoryName = value; }
+		}
 
 		/// <summary>
 		/// Gets or sets a value indicating whether category is browsable.
 		/// </summary>
 		/// <value><c>true</c> if category should be displayed at run time; otherwise, <c>false</c>.</value>
 		public bool Browsable { get; private set; }
+
+		// dmh - localization support constructors
+		public BrowsableCategoryAttribute(Type resourceType, string categoryName, bool browsable) : this (categoryName, browsable)
+		{
+			this.resourceType = resourceType;			
+		}
+
+		public BrowsableCategoryAttribute(Type resourceType, string categoryName) : this(categoryName)
+		{
+			this.resourceType = resourceType;
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="BrowsableCategoryAttribute"/> class.
