@@ -175,6 +175,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			if (propertyItem.Attributes != null)
 			{
+				// dmh - check for a password attribute before GetPropertyEditorByAttributes
+				//			because we need the propertyItem type to correctly create an editor on the fly
+				// NOTE:
+				// System.ComponentModel.AttributeCollection[type] does NOT return null, it returns 'default' value.
+				//	however, the PasswordPropertyTextAttribute it returns does not == default(PasswordPropertyTextAttribute) (??)
+				PasswordPropertyTextAttribute passwordAttribute = propertyItem.GetAttribute<PasswordPropertyTextAttribute>();
+				if (passwordAttribute.Password)
+					return new TypeEditor(propertyItem.PropertyType, EditorKeys.PasswordEditorKey);
+				
 				editor = GetPropertyEditorByAttributes(propertyItem.Attributes);
 				if (editor != null) return editor;
 			}
