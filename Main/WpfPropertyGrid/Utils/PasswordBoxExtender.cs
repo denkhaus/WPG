@@ -43,8 +43,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			// only handle this event when the property is attached to a PasswordBox   
 			// and when the BindPasswordProperty attached property has been set to true   
-			if (box == null || !GetBindPassword(d)) return;
-
+			// HACK: dmh - disable checking password bind- BoundPasswordChanged can come in before BindPassword is set 
+			if (box == null) //|| !GetBindPassword(d)) return;
+				return;
 			// avoid recursive updating by ignoring the box's changed event   
 			box.PasswordChanged -= HandlePasswordChanged;
 
