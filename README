@@ -1,3 +1,0 @@
-a fork of baks data validation fork of WPG adding support for System.ComponentModel.DataAnnotations.DisplayAttribute for localized and more compacted attributes that define property grid item behavior.
-NOTE: this is a breaking fork! It targets .NET 4.0 as DisplayAttribute is new to .NET 4.0. It also removes the old attributes as they duplicate the functionaly of DisplayAttribute.
-
