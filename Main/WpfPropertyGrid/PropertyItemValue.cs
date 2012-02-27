@@ -109,18 +109,21 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			{
 				object value = property.GetValue();
 
-				PropertyDescriptorCollection descriptors = property.Converter.GetProperties(value);
-				if (descriptors != null)
-					foreach (PropertyDescriptor d in descriptors)
-					{
-						subProperties.Add(new PropertyItem(property.Owner, value, d));
-						// TODO: Move to PropertyData as a public property
-						NotifyParentPropertyAttribute notifyParent = d.Attributes[KnownTypes.Attributes.NotifyParentPropertyAttribute] as NotifyParentPropertyAttribute;
-						if (notifyParent != null && notifyParent.NotifyParent)
+				if (value != null)
+				{
+					PropertyDescriptorCollection descriptors = property.Converter.GetProperties(value);
+					if (descriptors != null)
+						foreach (PropertyDescriptor d in descriptors)
 						{
-							d.AddValueChanged(value, NotifySubPropertyChanged);
+							subProperties.Add(new PropertyItem(property.Owner, value, d));
+							// TODO: Move to PropertyData as a public property
+							NotifyParentPropertyAttribute notifyParent = d.Attributes[KnownTypes.Attributes.NotifyParentPropertyAttribute] as NotifyParentPropertyAttribute;
+							if (notifyParent != null && notifyParent.NotifyParent)
+							{
+								d.AddValueChanged(value, NotifySubPropertyChanged);
+							}
 						}
-					}
+				}
 			}
 
 			this.property.PropertyChanged += ParentPropertyChanged;
