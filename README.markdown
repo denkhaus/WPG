@@ -1,6 +1,3 @@
-A fork of WPG
-*		Added Localization support
-**			DisplayAttribute support
-**			Custom attributes are updated
+*	Added Localization support! DisplayAttribute and custom attributes are updated to support a resource file type.
 
-Note! It's retargeted for .NET 4.0 (DisplayAttribute is new w/ 4.0) whereas the original is written for .NET 3.5
+Note! This fork is retargeted for .NET 4.0 (DisplayAttribute is new w/ 4.0) whereas the original is written for .NET 3.5
