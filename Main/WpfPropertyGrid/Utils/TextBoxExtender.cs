@@ -66,6 +66,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 			return (bool)target.GetValue(CommitOnEnterProperty);
 		}
+
+		
+
 		#endregion
 
 		#region CommitOnTyping
@@ -94,6 +97,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			BindingExpression expression = textbox.GetBindingExpression(TextBox.TextProperty);
 			if (expression != null) expression.UpdateSource();
 			e.Handled = true;
+		}
+
+		static void TextBoxCommitValueOnFocusLost(object sender, RoutedEventArgs e)
+		{			
+			TextBox textbox = sender as TextBox;
+			if (textbox == null) return;
+			BindingExpression expression = textbox.GetBindingExpression(TextBox.TextProperty);
+			if (expression != null) expression.UpdateSource();
+			//e.Handled = true;
 		}
 
 		public static void SetCommitOnTyping(TextBox target, bool value)
@@ -222,6 +234,36 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			if (tb == null || tb.IsKeyboardFocusWithin) return;
 			e.Handled = true;
 			tb.Focus();
+		}
+
+		#endregion
+
+		#region CommitOnFocusLost
+		public static readonly DependencyProperty CommitOnFocusLostProperty = DependencyProperty.RegisterAttached("CommitOnFocusLost", typeof(bool), typeof(TextBoxExtender), new FrameworkPropertyMetadata(false, OnCommitOnFocusLost));
+
+		private static void OnCommitOnFocusLost(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+		{
+			TextBox textbox = sender as TextBox;
+			if (textbox == null) return;
+
+			bool wasBound = (bool)(e.OldValue);
+			bool needToBind = (bool)(e.NewValue);
+
+			if (wasBound)
+				textbox.PreviewLostKeyboardFocus -= TextBoxCommitValueOnFocusLost;
+
+			if (needToBind)
+				textbox.PreviewLostKeyboardFocus += TextBoxCommitValueOnFocusLost;
+		}
+
+		public static bool GetCommitOnFocusLost(TextBox target)
+		{
+			return (bool)target.GetValue(CommitOnFocusLostProperty);
+		}
+
+		public static void SetCommitOnFocusLost(DependencyObject target, bool value)
+		{
+			target.SetValue(CommitOnFocusLostProperty, value);
 		}
 
 		#endregion
