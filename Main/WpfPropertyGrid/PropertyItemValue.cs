@@ -31,7 +31,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 		#region IDataErrorInfoValidation Stuff
 		private readonly Dictionary<string, ValidationAttribute[]> validators;
-		private readonly Dictionary<string, Func<object, object>> getters;
+		//private readonly Dictionary<string, Func<object, object>> getters; dmh - removed
 		#endregion
 
 		#region Events
@@ -93,13 +93,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			#region IDataErrorInfo Validation attributes loading and property value getters
 
-			validators = this.property.UnwrappedComponent.GetType().GetProperties().
-				Where(componentProperties => componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true).Length > 0).
-				ToDictionary(componentProperties => componentProperties.Name, componentProperties => (ValidationAttribute[])componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true));
-
-			getters = this.property.UnwrappedComponent.GetType().GetProperties().
-				Where(componentProperties => componentProperties.GetCustomAttributes(typeof(ValidationAttribute), true).Length > 0).
-				ToDictionary(componentProperties => componentProperties.Name, componentProperties => new Func<object, object>(propertyWrapper => componentProperties.GetValue(propertyWrapper, null)));
+			// dmh - use property.Attributes instead of property.UnwrappedComponent.GetType().GetProperties() which can be empty
+			//	   - removed getters. the actual value was unused
+			validators = new Dictionary<string, ValidationAttribute[]> { { property.Name, property.Attributes.OfType<ValidationAttribute>().ToArray() } };
 
 			#endregion
 
@@ -174,7 +170,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			//if (value.Length == 0) return null;
 			if (string.IsNullOrEmpty(value)) return null;
 			if (!property.Converter.CanConvertFrom(typeof(string)))
+			{
+				return null;
 				throw new InvalidOperationException("Value to String conversion is not supported!");
+			}
 			return property.Converter.ConvertFromString(null, GetSerializationCulture(), value);
 		}
 
@@ -194,9 +193,16 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			TypeConverter converter = property.Converter;
 			collectionValue = converter.CanConvertTo(typeof(string)) ? converter.ConvertToString(null, GetSerializationCulture(), value) : value.ToString();
 
+			IList list = value as IList;
+			if (list != null)
+			{
+				Type type = list.GetType().GetGenericArguments()[0];
+				collectionValue = list.Count + " " + type.Name + "(s)";
+			}
+
 			// TODO: refer to resources or some constant
-			if (string.IsNullOrEmpty(collectionValue) && (value is IEnumerable))
-				collectionValue = "(Collection)";
+			//if (string.IsNullOrEmpty(collectionValue) && (value is IEnumerable))
+			//    collectionValue = "(Collection)";
 
 			return collectionValue;
 		}
@@ -278,7 +284,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <value><c>true</c> if expceptions should be cought; otherwise, <c>false</c>.</value>
 		protected virtual bool CatchExceptions
 		{
-			get { return (PropertyValueException != null); }
+			get { return true; } 
+			//get { return (PropertyValueException != null); }
 		}
 
 		/// <summary>
@@ -482,7 +489,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 			get
 			{
-				if (getters.ContainsKey(property.Name))
+				if (validators != null && validators.ContainsKey(property.Name))
 				{
 					string[] errorMessages = validators[property.Name]
 						.Where(v => v.IsValid(property.PropertyValue.Value) == false)
