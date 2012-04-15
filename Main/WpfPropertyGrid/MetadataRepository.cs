@@ -18,6 +18,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -246,9 +247,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					CollectAttributes(target, descriptor);
 				}
 
+				// Boris Tschirner - Collect Fields as well
+				foreach (FieldInfo field in target.GetType().GetFields())
+				{
+					FieldPropertyDescriptor fieldDesc = new FieldPropertyDescriptor(field);
+					result.Add(fieldDesc.Name, new PropertyData(fieldDesc));
+					CollectAttributes(target, fieldDesc);
+				}
 				properties.Add(targetType, result);
 			}
-
 			return result;
 		}
 

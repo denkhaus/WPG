@@ -132,6 +132,7 @@
     <Compile Include="Design\PropertyNameTextBlock.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorKeys.cs" />
+    <Compile Include="FieldPropertyDescriptor.cs" />
     <Compile Include="FontInfo.cs" />
     <Compile Include="GridEntryCollection.cs" />
     <Compile Include="KnownTypes.cs" />
