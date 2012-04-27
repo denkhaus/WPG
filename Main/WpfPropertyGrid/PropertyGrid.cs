@@ -282,6 +282,11 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			}
 		}
 
+		// !!!dmh	- added funcs for encrypting/decrypting property values on the UI
+		//			- these must be set for the string value of a property to correct be shown / retrieved from UI
+		public Func<string, string> PropertyEncryptor { get; set; }
+		public Func<string, string> PropertyDecryptor { get; set; }
+
 		/// <summary>
 		/// Gets or sets the default category comparer.
 		/// </summary>
@@ -502,6 +507,15 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			PropertyGrid propertyGrid = (PropertyGrid) sender;
 			if (propertyGrid.SelectedObject == null) return;
 			propertyGrid.DoReload();
+		}
+
+		public IEnumerable<string> GetAllValidationErrors()
+		{
+			if (Properties == null) return new HashSet<string>();
+			// validate only visible (UI relevant) properties
+			return Properties.Where(p => p.IsBrowsable)
+				.Select(property => property.PropertyValue[property.Name])
+				.Where(temp => !string.IsNullOrWhiteSpace(temp));
 		}
 
 		/// <summary>

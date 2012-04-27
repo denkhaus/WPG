@@ -83,6 +83,13 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			get { return value ?? (value = CreatePropertyValueInstance()); }
 		}
 
+		// !!! dmh - added IsEncrypted to support on the fly decryption/encryption of strings on the UI
+		public bool IsEncrypted
+		{
+			get;
+			private set;
+		}
+
 		/// <summary>
 		/// Creates the property value instance.
 		/// </summary>

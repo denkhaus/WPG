@@ -98,7 +98,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			validators = new Dictionary<string, ValidationAttribute[]> { { property.Name, property.Attributes.OfType<ValidationAttribute>().ToArray() } };
 
 			#endregion
-
+			
 			hasSubProperties = property.Converter.GetPropertiesSupported();
 
 			if (hasSubProperties)
@@ -307,17 +307,30 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					{
 						OnPropertyValueException(new ValueExceptionEventArgs("Cannot convert value to string", this, ValueExceptionSource.Get, exception));
 					}
-					return str;
+					//return str;
 				}
-				return ConvertValueToString(Value);
+				else 
+					str = ConvertValueToString(Value);
+
+				// !!! dmh - decrypt the value on the fly for display on the UI
+				if (property.IsEncrypted && Decryptor != null)
+					return Decryptor(str);
+				
+				return str;
 			}
 			set
-			{
+			{			
+				string str = value;
+
+				// !!! dmh - encrypt the UI value on the fly 
+				if (property.IsEncrypted && Encryptor != null)
+					str = Encryptor(value);
+
 				if (CatchExceptions)
 				{
 					try
 					{
-						Value = ConvertStringToValue(value);
+						Value = ConvertStringToValue(str);
 					}
 					catch (Exception exception)
 					{
@@ -326,7 +339,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				}
 				else
 				{
-					Value = ConvertStringToValue(value);
+					Value = ConvertStringToValue(str);
 				}
 			}
 		}
@@ -399,6 +412,11 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 			get { return !property.IsReadOnly; }
 		}
+
+		
+
+		public Func<string,string> Encryptor { get; set; }
+		public Func<string,string> Decryptor { get; set; }
 
 		#endregion
 
