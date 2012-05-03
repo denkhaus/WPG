@@ -871,16 +871,30 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			RaisePropertyValueChangedEvent(property, oldValue);
 		}
 
+		// !!! dmh - handler for sub properties being changed (complex property layout, etc)
+		private void OnPropertyItemSubValueChanged(object sender, EventArgs e)
+		{
+			PropertyItemValue propertyItemValue = sender as PropertyItemValue;
+			if (propertyItemValue == null)
+				return;
+
+			RaisePropertyValueChangedEvent(propertyItemValue.ParentProperty, EventArgs.Empty);
+		}
+
 		private void HookPropertyChanged(PropertyItem item)
 		{
 			if (item == null) return;
 			item.ValueChanged += OnPropertyItemValueChanged;
+			// !!! dmh - listen to sub properties
+			item.PropertyValue.SubPropertyChanged += OnPropertyItemSubValueChanged;
 		}
 
 		private void UnhookPropertyChanged(PropertyItem item)
 		{
 			if (item == null) return;
 			item.ValueChanged -= OnPropertyItemValueChanged;
+			// !!! dmh - listen to sub properties
+			item.PropertyValue.SubPropertyChanged -= OnPropertyItemSubValueChanged;
 		}
 
 		#endregion
