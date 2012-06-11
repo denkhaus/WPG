@@ -1,3 +1,8 @@
-*	Added Localization support! DisplayAttribute and custom attributes are updated to support a resource file type.
+An updated, active branch of WpfPropertyGrid fully supporting localization. 
 
-Note! This fork is retargeted for .NET 4.0 (DisplayAttribute is new w/ 4.0) whereas the original is written for .NET 3.5
+Here are additions and changes:
+*	Now requires .NET 4.0+ (For DisplayAttribute)!!
+*	Added Localization support! DisplayAttribute and custom attributes are updated to support a resource file type.
+*	Custom property encryption and decryption on the UI level
+*	Various minor bug fixes and a few enhancements
+*	System.ComponentModel.DataAnnotations Validation support (IDataErrorInfo support from baks branch)
