@@ -37,7 +37,12 @@
 			/>
   </DataTemplate>
 
-  <DataTemplate x:Key="{x:Static local:EditorKeys.EnumEditorKey}">
+	<DataTemplate x:Key="{x:Static local:EditorKeys.StandardValuesEditorKey}">
+		<ComboBox x:Name="PART_editor" SelectedValue="{Binding Value, Mode=TwoWay}" ItemsSource="{Binding ParentProperty.StandardValues}"
+				  IsEnabled="{Binding IsEditable}"/>
+	</DataTemplate>
+	
+	<DataTemplate x:Key="{x:Static local:EditorKeys.EnumEditorKey}">
     <controls:EnumDropdown
       x:Name="PART_editor"
       Style="{DynamicResource {x:Type ComboBox}}"

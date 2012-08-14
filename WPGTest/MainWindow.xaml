@@ -6,9 +6,9 @@
         Title="MainWindow" Height="350" Width="525"
 		Loaded="OnLoaded">
     <Grid>
-		<WpfPropertyGrid:PropertyGrid x:Name="propertyGrid">
+		<WpfPropertyGrid:PropertyGrid x:Name="propertyGrid" PropertyFilterVisibility="Collapsed">
 			<WpfPropertyGrid:PropertyGrid.Layout>
-				<Design:CategorizedLayout />
+				<Design:AlphabeticalLayout />
 			</WpfPropertyGrid:PropertyGrid.Layout>
 		</WpfPropertyGrid:PropertyGrid>
 	</Grid>

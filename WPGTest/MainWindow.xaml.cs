@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WPGTest
 {
@@ -32,7 +22,27 @@ namespace WPGTest
 
 	public class BusinessObject
 	{
-		public string Property1 { get; set; }
-		public string Property2 { get; set; }
+		public enum TestEnum { One, Two, Three };
+		public SolidColorBrush Brush1 { get; set; }
+		public SolidColorBrush Brush2 { get; set; }
+		public SolidColorBrush Brush3 { get; set; }
+		public string[] Things { get; set; }
+		
+		//[System.Windows.Controls.WpfPropertyGrid.PropertyEditor("StandardValuesEditor")]
+		public TestEnum TestEnumThing { get; set; }
+
+		public ObservableCollection<Brush>  MoreBrushes { get; set; }
+		public BusinessObject()
+		{
+			Brush1 = Brushes.Red;
+			Brush2 = Brushes.Green;
+			Brush3 = Brushes.Blue;
+
+			Things = new [] { "Foo", "Bar", "Baz" };
+
+			MoreBrushes = new ObservableCollection<Brush>() { Brush1, Brush2, Brush3 };
+		}
+
+		
 	}
 }
