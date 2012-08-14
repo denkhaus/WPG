@@ -242,12 +242,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\NinjaTrader.Core\NinjaTrader.Core.csproj">
-      <Project>{D778943A-F570-43D4-B7D3-02237497B2B1}</Project>
-      <Name>NinjaTrader.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
