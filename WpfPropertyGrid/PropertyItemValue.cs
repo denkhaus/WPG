@@ -196,8 +196,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			IList list = value as IList;
 			if (list != null)
 			{
-				Type type = list.GetType().GetGenericArguments()[0];
-				collectionValue = list.Count + " " + type.Name + "(s)";
+				// be sure to check here, NinjaTrader.Cbi.RolloverCollection implements IList but is not generic
+				Type[] types = list.GetType().GetGenericArguments();
+				if (types.Length > 0)
+					collectionValue = list.Count + " " + types[0].Name + "(s)";
 			}
 
 			// TODO: refer to resources or some constant

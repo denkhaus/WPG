@@ -69,9 +69,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		private static FontStyleConverterDecorator defaultFontStyleConverterDecorator;
 		public static FontStyleConverterDecorator DefaultFontStyleConverterDecorator
 		{
-			get {
-				return defaultFontStyleConverterDecorator ?? (defaultFontStyleConverterDecorator = new FontStyleConverterDecorator());
-			}
+			get { return defaultFontStyleConverterDecorator ?? (defaultFontStyleConverterDecorator = new FontStyleConverterDecorator()); }
 		}
 		#endregion
 

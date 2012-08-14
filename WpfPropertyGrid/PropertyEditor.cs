@@ -25,8 +25,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <summary>
 		/// Identifies the <see cref="DeclaringType"/> property. This is a dependency property.
 		/// </summary>
-		public static readonly DependencyProperty DeclaringTypeProperty =
-		  DependencyProperty.Register("DeclaringType", typeof(Type), thisType, new PropertyMetadata(null));
+		public static readonly DependencyProperty DeclaringTypeProperty = DependencyProperty.Register("DeclaringType", typeof(Type), thisType, new PropertyMetadata(null));
 
 		/// <summary>
 		/// Gets or sets type of the object containing edited property.
@@ -41,8 +40,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <summary>
 		/// Identifies the <see cref="PropertyName"/> property. This is a dependency property.
 		/// </summary>
-		public static readonly DependencyProperty PropertyNameProperty =
-		  DependencyProperty.Register("PropertyName", typeof(string), thisType, new PropertyMetadata(null));
+		public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register("PropertyName", typeof(string), thisType, new PropertyMetadata(null));
 
 		/// <summary>
 		/// Gets or sets the name of the property the editor is bound to.

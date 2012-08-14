@@ -17,7 +17,7 @@
 			<ComboBox.ItemTemplate>
 				<DataTemplate>
 					<StackPanel Orientation="Horizontal">
-						<Rectangle Margin="5" Fill="{Binding Name}" Width="30" Height="10" VerticalAlignment="Center" StrokeThickness="1" Stroke="{Binding ElementName=brushPicker, Path=Background}"/>
+						<Rectangle Margin="6, 0" Fill="{Binding Name}" Width="30" Height="10" VerticalAlignment="Center" StrokeThickness="1" Stroke="{Binding ElementName=brushPicker, Path=Background}"/>
 						<TextBlock x:Name="BrushName"  Text="{Binding Name}" VerticalAlignment="Center"/>
 					</StackPanel>
 				</DataTemplate>

@@ -423,8 +423,6 @@ namespace System.Windows.Controls.WpfPropertyGrid.Controls
 			//
 			// Make sure the change is line up with Max/Min Limits and set the precission as specified.
 			Value = EnforceLimitsAndPrecision(newValue);
-
-			return;
 		}
 
 		private double EnforceLimitsAndPrecision(double value)

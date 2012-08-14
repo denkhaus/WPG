@@ -44,13 +44,14 @@ namespace System.Windows.Controls.WpfPropertyGrid.Controls
 		private static void OnPropertyValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
 		{
 			EnumDropdown dropdown = (EnumDropdown)sender;
-			if (e.OldValue != null) dropdown.UnwrapEventHandlers((PropertyItemValue)e.OldValue);
+			if (e.OldValue != null) 
+				dropdown.UnwrapEventHandlers((PropertyItemValue)e.OldValue);
 
 			PropertyItemValue newValue = e.NewValue as PropertyItemValue;
 			if (newValue == null) return;
 
-			dropdown.SelectedValue = newValue.Value;
-			dropdown.ItemsSource = newValue.ParentProperty.StandardValues;
+			dropdown.SelectedValue	= newValue.Value;
+			dropdown.ItemsSource	= newValue.ParentProperty.StandardValues;
 			dropdown.WrapEventHandlers(newValue);
 		}
 		#endregion
@@ -64,11 +65,6 @@ namespace System.Windows.Controls.WpfPropertyGrid.Controls
 			Loaded += EnumDropdownLoaded;
 			Unloaded += EnumDropdownUnloaded;
 		}
-
-		//static EnumDropdown()
-		//{
-		//    DefaultStyleKeyProperty.OverrideMetadata(typeof(ComboBox), new FrameworkPropertyMetadata(typeof(ComboBox)));
-		//}
 
 		void EnumDropdownLoaded(object sender, RoutedEventArgs e)
 		{
@@ -117,9 +113,10 @@ namespace System.Windows.Controls.WpfPropertyGrid.Controls
 		/// <param name="e">Provides data for <see cref="T:System.Windows.Controls.SelectionChangedEventArgs"/>.</param>
 		protected override void OnSelectionChanged(SelectionChangedEventArgs e)
 		{
-			// TODO: unsafe code!
-			PropertyValue.Value = e.AddedItems[0];
 			base.OnSelectionChanged(e);
+			// TODO: unsafe code!
+			if (e.AddedItems.Count > 0)
+				PropertyValue.Value = e.AddedItems[0];
 		}
 	}
 }

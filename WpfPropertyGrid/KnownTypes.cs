@@ -28,7 +28,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	{
 		public static class Collections
 		{
+// ReSharper disable InconsistentNaming
 			public static readonly Type IList = typeof(IList);
+// ReSharper restore InconsistentNaming
 		}
 
 		public static class Attributes
@@ -37,6 +39,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			public static readonly Type MergablePropertyAttribute		= typeof(MergablePropertyAttribute);
 			public static readonly Type PropertyEditorAttribute			= typeof(PropertyEditorAttribute);
 			public static readonly Type CategoryEditorAttribute			= typeof(CategoryEditorAttribute);
+			public static readonly Type CategoryExpandedAttribute		= typeof(CategoryExpandedAttribute);
 			public static readonly Type NotifyParentPropertyAttribute	= typeof(NotifyParentPropertyAttribute);
 		}
 

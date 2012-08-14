@@ -18,7 +18,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -27,8 +26,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	// It will be able in future creating dynamic objects without using reflection
 	public class PropertyData : IEquatable<PropertyData>
 	{
-		#region Fields
-
 		private static readonly List<Type> cultureInvariantTypes = new List<Type> 
 																			{
 																				KnownTypes.Wpf.CornerRadius,
@@ -49,8 +46,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 																				KnownTypes.Wpf.Thickness, 
 																				KnownTypes.Wpf.Vector
 																			};
-
-		#endregion
 
 		public PropertyDescriptor Descriptor { get; private set; }
 
@@ -234,29 +229,28 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 		private static PropertySet CollectProperties(object target)
 		{
-			Type targetType = target.GetType();
-			PropertySet result;
+			Type							targetType				= target.GetType();
+			PropertySet						result					= null;
+			TypeConverter					typeConverter			= TypeDescriptor.GetConverter(target);
+			PropertyDescriptorCollection	propertiesCollection	= typeConverter.GetPropertiesSupported() ?
+				typeConverter.GetProperties(null, target, propertyFilter) : TypeDescriptor.GetProperties(target, propertyFilter);
 
-			if (!properties.TryGetValue(targetType, out result))
+			if (propertiesCollection != null && !properties.TryGetValue(targetType, out result))
 			{
 				result = new PropertySet();
-
-				foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(target, propertyFilter))
+				foreach (PropertyDescriptor descriptor in propertiesCollection)
 				{
-					result.Add(descriptor.Name, new PropertyData(descriptor));
+					//!!! NOTE Art R tmp hack to avoid same property names in dictionary
+					string key = descriptor.Name;
+					if(!result.ContainsKey(key))
+						result.Add(key, new PropertyData(descriptor));
 					CollectAttributes(target, descriptor);
 				}
 
-				// Boris Tschirner - Collect Fields as well
-				foreach (FieldInfo field in target.GetType().GetFields())
-				{
-					FieldPropertyDescriptor fieldDesc = new FieldPropertyDescriptor(field);
-					result.Add(fieldDesc.Name, new PropertyData(fieldDesc));
-					CollectAttributes(target, fieldDesc);
-				}
 				properties.Add(targetType, result);
 			}
-			return result;
+
+			return result ?? new PropertySet();
 		}
 
 		#endregion Property Management
@@ -311,8 +305,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 				attributeSet.Add(descriptor.Name, attributes);
 			}
-
-			return;
 		}
 
 		public static IEnumerable<Attribute> GetAttributes(object target, string propertyName)

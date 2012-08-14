@@ -16,6 +16,7 @@
 using System.Collections;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -26,6 +27,28 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	{
 		private readonly	PropertyItemValue parentValue;
 		private				PropertyItemValue value;
+
+		private class ComponentContext: ITypeDescriptorContext
+		{
+			private readonly object instance;
+
+			public ComponentContext(object instance)
+			{
+				this.instance = instance;
+			}
+
+			public bool OnComponentChanging() { return false; }
+
+			public void OnComponentChanged(){}
+
+			public IContainer Container { get { return null; } }
+
+			public object Instance { get { return instance; } }
+
+			public PropertyDescriptor PropertyDescriptor { get { return null; } }
+
+			public object GetService(Type serviceType) { return null;}
+		}
 
 		#region Fields
 		private readonly	object					component;
@@ -90,6 +113,19 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			private set;
 		}
 
+		// !!! dmh - added IsExpanded for programmic control / styling of complex properties 
+		private bool isExpanded;
+		public bool IsExpanded
+		{
+			get { return isExpanded; }
+			set 
+			{
+				if (isExpanded == value) return;
+				isExpanded = value;
+				OnPropertyChanged("IsExpanded");
+			}
+		}
+
 		/// <summary>
 		/// Creates the property value instance.
 		/// </summary>
@@ -131,7 +167,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			IsBrowsable			= descriptor.IsBrowsable;
 			isReadOnly			= descriptor.IsReadOnly;
+
 			// !!! dmh - modify these to check if we have a display attribute to use instead
+
 			DisplayAttribute dispAttr = (DisplayAttribute)descriptor.Attributes[typeof(DisplayAttribute)];
 			if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.Description))
 				if (dispAttr.ResourceType != null)
@@ -146,20 +184,42 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					}
 				}
 				else description = dispAttr.Description;
-			else description = descriptor.Description;
+			else description = DisplayName;
 
 			if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.GroupName))
 			{
 				if (dispAttr.ResourceType != null)
 				{
-					try { categoryName = dispAttr.GetGroupName(); }
-					catch { categoryName = dispAttr.GroupName; }
+					try		{ categoryName = dispAttr.GetGroupName(); }
+					catch	{ categoryName = dispAttr.GroupName; }
 				}
 				else categoryName = dispAttr.GroupName;
 			}
 			else categoryName = descriptor.Category;
 
+			if (dispAttr != null && !string.IsNullOrEmpty(dispAttr.Prompt))
+			{
+				if (dispAttr.ResourceType != null)
+				{
+					try { prompt = dispAttr.GetPrompt(); }
+					catch { prompt = dispAttr.Prompt; }
+				}
+				else prompt = dispAttr.Prompt;
+			}
+			else prompt = DisplayName;
+
 			isLocalizable = descriptor.IsLocalizable;
+
+			// !!! dmh - check if property is encrypted
+			// do not use 'descriptor.Attributes[typeof(NinjaTrader.Gui.EncryptAttribute)]'
+			//			-> this returns a default NinjaTrader.Gui.EncryptAttribute unless it takes parameters
+			if (descriptor.Attributes.OfType<Metadata.EncryptAttribute>().Any())
+			{
+				IsEncrypted = true;
+				
+				PropertyValue.Encryptor = owner.PropertyEncryptor;
+				PropertyValue.Decryptor = owner.PropertyDecryptor;
+			}
 
 			metadata = new AttributesContainer(descriptor.Attributes);
 			this.descriptor.AddValueChanged(component, ComponentValueChanged);
@@ -220,21 +280,27 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					DisplayAttribute					displayAttr			= GetAttribute<DisplayAttribute>();
 					ParenthesizePropertyNameAttribute	parenthesizeAttr	= GetAttribute<ParenthesizePropertyNameAttribute>();
 
-					// dmh - if we still have a null _displayName return some default here
-					string dispName;
-					if (displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name))
-					{
-						if (displayAttr.ResourceType != null)
+					// dmh - if we are using a runtime adjusted property - use it's descriptor as it's already been localized 
+					//if (descriptor is NinjaTrader.Gui.PropertyDescriptorExtended)
+					//    displayName = descriptor.DisplayName;
+					//else
+					//{
+						// dmh - if we still have a null _displayName return some default here
+						string dispName;
+						if (displayAttr != null && !string.IsNullOrEmpty(displayAttr.Name))
 						{
-							try		{ dispName = displayAttr.GetName(); }
-							catch	{ dispName = displayAttr.Name;		}
+							if (displayAttr.ResourceType != null)
+							{
+								try		{ dispName = displayAttr.GetName(); }
+								catch	{ dispName = displayAttr.Name;		}
+							}
+							else dispName = displayAttr.Name;
 						}
-						else dispName = displayAttr.Name;
-					}
-					else dispName = descriptor.DisplayName;
+						else dispName = descriptor.DisplayName;
 
-					// if property needs parenthesizing then apply parenthesis to resulting display name
-					displayName = (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? string.Format("({0})", dispName) : dispName;
+						// if property needs parenthesizing then apply parenthesis to resulting display name
+						displayName = (parenthesizeAttr != null && parenthesizeAttr.NeedParenthesis) ? string.Format("({0})", dispName) : dispName;
+					//}
 				}
 
 				return displayName;
@@ -280,6 +346,27 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				if (description == value) return;
 				description = value;
 				OnPropertyChanged("Description");
+			}
+		}
+		#endregion
+
+		#region Prompt
+		private string prompt;
+		/// <summary>
+		/// Gets the prompt of the encapsulated property.
+		/// </summary>
+		/// <value></value>
+		/// <returns>
+		/// The prompt of the encapsulated property.
+		/// </returns>
+		public string Prompt
+		{
+			get { return prompt; }
+			set
+			{
+				if (prompt == value) return;
+				prompt = value;
+				OnPropertyChanged("Prompt");
 			}
 		}
 		#endregion
@@ -364,10 +451,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 			get
 			{
-				if (Converter.GetStandardValuesSupported())
-					return Converter.GetStandardValues();
-
-				return new ArrayList(0);
+				return Converter.GetStandardValuesSupported() ? (ICollection)Converter.GetStandardValues(new ComponentContext(Component)) : new ArrayList(0);
 			}
 		}
 		#endregion
@@ -408,8 +492,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 			get
 			{
-				DescriptionAttribute attribute = GetAttribute<DescriptionAttribute>();
-				return (attribute != null && !string.IsNullOrEmpty(attribute.Description)) ? attribute.Description : DisplayName;
+				DisplayAttribute attribute = GetAttribute<DisplayAttribute>();
+				return (attribute != null && !string.IsNullOrEmpty(attribute.GetDescription())) ? attribute.GetDescription() : DisplayName;
 			}
 		}
 
@@ -547,11 +631,10 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			{
 				if (pValue != null && pValue.Equals(oldValue)) return;
 
-				if (PropertyType == typeof (object) || pValue == null && PropertyType.IsClass || pValue != null && PropertyType.IsAssignableFrom(pValue.GetType()))
+				if (PropertyType == typeof (object) || pValue == null && PropertyType.IsClass || pValue != null && PropertyType.IsInstanceOfType(pValue))
 					SetValueCore(pValue);
 				else if (pValue != null && pValue is NamedBrush)
 				{
-					
 					SetValueCore(((NamedBrush)pValue).Brush);
 				}
 				else if (pValue != null)
@@ -561,8 +644,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				}
 				OnValueChanged(oldValue, GetValue());
 			}
-			catch
+			catch (Exception ex)
 			{
+				MessageBox.Show(ex.Message);
 				// TODO: Provide error feedback!
 			}
 			OnPropertyChanged("PropertyValue");

@@ -21,19 +21,22 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	public static class EditorKeys
 	{
 		private static readonly Type thisType = typeof(EditorKeys);
-		private static readonly ComponentResourceKey namedColorEditorKey		= new ComponentResourceKey(thisType, "NamedColorEditor");
-		private static readonly ComponentResourceKey passwordEditorKey			= new ComponentResourceKey(thisType, "PasswordEditor");
-		private static readonly ComponentResourceKey defaultEditorKey			= new ComponentResourceKey(thisType, "DefaultEditor");
-		private static readonly ComponentResourceKey booleanEditorKey			= new ComponentResourceKey(thisType, "BooleanEditor");
-		private static readonly ComponentResourceKey doubleEditorKey			= new ComponentResourceKey(thisType, "DoubleEditor");
-		private static readonly ComponentResourceKey enumEditorKey				= new ComponentResourceKey(thisType, "EnumEditor");
-		private static readonly ComponentResourceKey sliderEditorKey			= new ComponentResourceKey(thisType, "SliderEditor");
-		private static readonly ComponentResourceKey fontFamilyEditorKey		= new ComponentResourceKey(thisType, "FontFamilyEditor");
-		private static readonly ComponentResourceKey brushEditorKey				= new ComponentResourceKey(thisType, "BrushEditor");
-		private static readonly ComponentResourceKey penEditorKey				= new ComponentResourceKey(thisType, "PenEditor");
-		private static readonly ComponentResourceKey dashStyleEditorKey			= new ComponentResourceKey(thisType, "DashStyleEditor");
-		private static readonly ComponentResourceKey defaultCategoryEditorKey	= new ComponentResourceKey(thisType, "DefaultCategoryEditor");
-		private static readonly ComponentResourceKey complexPropertyEditorKey	= new ComponentResourceKey(thisType, "ComplexPropertyEditor");
+		private static readonly ComponentResourceKey namedColorEditorKey			= new ComponentResourceKey(thisType, "NamedColorEditor");
+		private static readonly ComponentResourceKey passwordEditorKey				= new ComponentResourceKey(thisType, "PasswordEditor");
+		private static readonly ComponentResourceKey defaultEditorKey				= new ComponentResourceKey(thisType, "DefaultEditor");
+		private static readonly ComponentResourceKey booleanEditorKey				= new ComponentResourceKey(thisType, "BooleanEditor");
+		private static readonly ComponentResourceKey doubleEditorKey				= new ComponentResourceKey(thisType, "DoubleEditor");
+		private static readonly ComponentResourceKey intEditorKey					= new ComponentResourceKey(thisType, "IntEditor");
+		private static readonly ComponentResourceKey dateTimeEditorKey				= new ComponentResourceKey(thisType, "DateTimeEditor");
+		private static readonly ComponentResourceKey enumEditorKey					= new ComponentResourceKey(thisType, "EnumEditor");
+		private static readonly ComponentResourceKey sliderEditorKey				= new ComponentResourceKey(thisType, "SliderEditor");
+		private static readonly ComponentResourceKey fontFamilyEditorKey			= new ComponentResourceKey(thisType, "FontFamilyEditor");
+		private static readonly ComponentResourceKey brushEditorKey					= new ComponentResourceKey(thisType, "BrushEditor");
+		private static readonly ComponentResourceKey penEditorKey					= new ComponentResourceKey(thisType, "PenEditor");
+		private static readonly ComponentResourceKey dashStyleEditorKey				= new ComponentResourceKey(thisType, "DashStyleEditor");
+		private static readonly ComponentResourceKey defaultCategoryEditorKey		= new ComponentResourceKey(thisType, "DefaultCategoryEditor");
+		private static readonly ComponentResourceKey complexPropertyEditorKey		= new ComponentResourceKey(thisType, "ComplexPropertyEditor");
+		private static readonly ComponentResourceKey standardValuesEditorKey		= new ComponentResourceKey(thisType, "StandardValuesEditor");
 
 		/// <summary>
 		/// Gets the NamedBrush editor key.
@@ -60,10 +63,22 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		public static ComponentResourceKey BooleanEditorKey { get { return booleanEditorKey; } }
 
 		/// <summary>
+		/// Gets the date time editor key.
+		/// </summary>
+		/// <value>The double editor key.</value>
+		public static ComponentResourceKey DateTimeEditor { get { return dateTimeEditorKey; } }
+
+		/// <summary>
 		/// Gets the double editor key.
 		/// </summary>
 		/// <value>The double editor key.</value>
 		public static ComponentResourceKey DoubleEditorKey { get { return doubleEditorKey; } }
+
+		/// <summary>
+		/// Gets the int editor key.
+		/// </summary>
+		/// <value>The double editor key.</value>
+		public static ComponentResourceKey IntEditorKey { get { return intEditorKey; } }
 
 		/// <summary>
 		/// Gets the enum editor key.
@@ -76,6 +91,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// </summary>
 		/// <value>The slider editor key.</value>
 		public static ComponentResourceKey SliderEditorKey { get { return sliderEditorKey; } }
+
+		/// <summary>
+		/// Gets the standard values editor key.
+		/// </summary>
+		/// <value>The slider editor key.</value>
+		public static ComponentResourceKey StandardValuesEditorKey { get { return standardValuesEditorKey; } }
 
 		/// <summary>
 		/// Gets the font family editor key.

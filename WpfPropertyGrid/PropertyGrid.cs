@@ -17,7 +17,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Controls.WpfPropertyGrid.Controls;
@@ -191,9 +190,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 							if (oldValue != null && newValue != null && oldValue.GetType().Equals(newValue.GetType()))
 								SwapSelectedObject();
 							else
-							{
 								DoReload();
-							}
 						}
 							// process multiple selection
 						else
@@ -206,10 +203,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 					OnPropertyChanged("SelectedObjects");
 					OnPropertyChanged("SelectedObject");
 					OnSelectedObjectsChanged();
-				}
-				else
-				{
-					// TODO: Swap multiple objects here? Guess nothing can be done in this case...
 				}
 			}
 		}
@@ -272,7 +265,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			get { return propertyComparer ?? (propertyComparer = new PropertyItemComparer()); }
 			set
 			{
-				if (propertyComparer == value) return;
+				if (Equals(propertyComparer, value)) return;
 				propertyComparer = value;
 
 				if (properties != null)
@@ -296,7 +289,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			get { return categoryComparer ?? (categoryComparer = new CategoryItemComparer()); }
 			set
 			{
-				if (categoryComparer == value) return;
+				if (Equals(categoryComparer, value)) return;
 				categoryComparer = value;
 
 				if (categories != null)
@@ -511,7 +504,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 		public IEnumerable<string> GetAllValidationErrors()
 		{
-			if (Properties == null) return new HashSet<string>();
+		    if (Properties == null)		return new HashSet<string>();
 			// validate only visible (UI relevant) properties
 			return Properties.Where(p => p.IsBrowsable)
 				.Select(property => property.PropertyValue[property.Name])
@@ -636,7 +629,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		/// <param name="delta">The delta.</param>
 		private UIElement GetTabElement(DependencyObject source, int delta)
 		{
-			if (source == null) return null;
+			// !!! dmh - added check for UIElement, Hyperlink can end here and throw an exception in FindVisualChild
+			if (source == null || !(source is UIElement)) return null;
 			PropertyContainer container = null;
 			if (source is SearchTextBox && HasCategories)
 			{
@@ -712,7 +706,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 #if DEBUG
 			// Check the attribute argument to be passed
-			Debug.Assert(attribute != null);
+			Diagnostics.Debug.Assert(attribute != null);
 #else
 			if (attribute == null) return null;
 #endif
@@ -768,7 +762,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 		{
 #if DEBUG
 			// Check the attribute argument to be passed
-			Debug.Assert(propertyDescriptor != null);
+			Diagnostics.Debug.Assert(propertyDescriptor != null);
 #else
 			if (propertyDescriptor == null) return false;
 #endif
@@ -803,8 +797,12 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 		#region Private members
 
-		private void DoReload()
+		public void DoReload()
 		{
+			// Create list of expanded properties in expanded state
+			expandedItems.Clear();
+			SaveExpandedPropertiesState(Properties);
+
 			if (SelectedObject == null)
 			{
 				Categories = new GridEntryCollection<CategoryItem>();
@@ -853,6 +851,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				Categories = categoryItems; 
 				Properties = new GridEntryCollection<PropertyItem>(propertyItems);
 			}
+
+			// Restore expanded states for properties
+			RestoreExpandedPropertiesState(Properties); 
 		}
 
 		private static void CopyCategoryFrom(GridEntryCollection<CategoryItem> oldValue, IEnumerable<CategoryItem> newValue)
@@ -866,11 +867,30 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			}
 		}
 
-		private void OnPropertyItemValueChanged(PropertyItem property, object oldValue, object newValue)
+		private void HookPropertyChanged(PropertyItem item)
 		{
-			RaisePropertyValueChangedEvent(property, oldValue);
+			if (item == null) return;
+			item.ValueChanged += OnPropertyItemValueChanged;
+			// dmh - listen to sub properties
+			//foreach (PropertyItem pi in item.PropertyValue.SubProperties)
+			//	pi.ValueChanged += OnPropertyItemSubValueChanged;
+			item.PropertyValue.SubPropertyChanged += OnPropertyItemSubValueChanged;
 		}
 
+		private void OnPropertyItemValueChanged(PropertyItem property, object oldValue, object newValue)
+		{
+			AttributeCollection attributeCollection = property.Attributes;
+			if (attributeCollection != null)
+				foreach (RefreshPropertiesAttribute refreshAttribute in attributeCollection.OfType<RefreshPropertiesAttribute>())
+					switch (refreshAttribute.RefreshProperties)
+					{
+						case RefreshProperties.All		:	MetadataRepository.Clear();		DoReload();	break;
+						case RefreshProperties.Repaint	:									DoReload();	break;
+					}
+
+			RaisePropertyValueChangedEvent(property, oldValue);
+		}
+		
 		// !!! dmh - handler for sub properties being changed (complex property layout, etc)
 		private void OnPropertyItemSubValueChanged(object sender, EventArgs e)
 		{
@@ -881,19 +901,59 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			RaisePropertyValueChangedEvent(propertyItemValue.ParentProperty, EventArgs.Empty);
 		}
 
-		private void HookPropertyChanged(PropertyItem item)
+		private void RestoreExpandedPropertiesState(GridEntryCollection<PropertyItem> propCollection)
 		{
-			if (item == null) return;
-			item.ValueChanged += OnPropertyItemValueChanged;
-			// !!! dmh - listen to sub properties
-			item.PropertyValue.SubPropertyChanged += OnPropertyItemSubValueChanged;
+			foreach (PropertyItem expandedItem in expandedItems)
+			{
+				PropertyItem pi = SearchForProperty(propCollection, expandedItem);
+				if (pi != null)
+					pi.IsExpanded = true;
+			}
+		}
+
+		private void SaveExpandedPropertiesState(GridEntryCollection<PropertyItem> propCollection)
+		{
+			if (propCollection == null)
+				return;
+
+			foreach (PropertyItem pi in propCollection)
+			{
+				if (pi.IsExpanded)
+					expandedItems.Add(pi);
+
+				if (pi.PropertyValue.SubProperties.Count > 0)
+					SaveExpandedPropertiesState(pi.PropertyValue.SubProperties);
+			}
+		}
+
+		private PropertyItem SearchForProperty(GridEntryCollection<PropertyItem> propCollection, PropertyItem expandedItem)
+		{
+			if (propCollection == null)
+				return null;
+
+			foreach (PropertyItem pi in propCollection)
+			{
+				if (pi.DisplayName == expandedItem.DisplayName & pi.Description == expandedItem.Description & pi.Name == expandedItem.Name)
+					return pi;
+
+				if (pi.PropertyValue.SubProperties.Count > 0)
+				{
+					PropertyItem foundItem = SearchForProperty(pi.PropertyValue.SubProperties, expandedItem);
+					if (foundItem != null) return foundItem;
+				}
+			}
+
+			return null;
 		}
 
 		private void UnhookPropertyChanged(PropertyItem item)
 		{
 			if (item == null) return;
 			item.ValueChanged -= OnPropertyItemValueChanged;
-			// !!! dmh - listen to sub properties
+			
+			// dmh - listen to sub properties
+			//foreach (PropertyItem pi in item.PropertyValue.SubProperties)
+			//	pi.ValueChanged -= OnPropertyItemValueChanged;
 			item.PropertyValue.SubPropertyChanged -= OnPropertyItemSubValueChanged;
 		}
 
@@ -910,7 +970,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 		#region Properties
 
-		private readonly EditorCollection editors = new EditorCollection();
+		private readonly	EditorCollection		editors				= new EditorCollection();
+		private				List<PropertyItem>		expandedItems		= new List<PropertyItem>();
 
 		/// <summary>
 		/// Gets the editors collection.
@@ -961,7 +1022,7 @@ namespace System.Windows.Controls.WpfPropertyGrid
 			//EventManager.RegisterClassHandler(typeof(PropertyGrid), GotFocusEvent, new RoutedEventHandler(ShowDescription), true);
 			AddHandler(GotFocusEvent, new RoutedEventHandler(ShowDescription), true);
 			// Assign Layout to be Alphabetical by default
-			Layout = new AlphabeticalLayout();
+			Layout = new CategorizedLayout();
 
 			// Wire command bindings
 			InitializeCommandBindings();

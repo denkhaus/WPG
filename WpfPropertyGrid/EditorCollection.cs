@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 
 namespace System.Windows.Controls.WpfPropertyGrid
 {
@@ -27,16 +28,19 @@ namespace System.Windows.Controls.WpfPropertyGrid
 	{
 		private readonly Dictionary<Type, Editor> cache = new Dictionary<Type, Editor>
 				{
-					{ typeof(Boolean),				new TypeEditor(typeof(Boolean),				EditorKeys.BooleanEditorKey) },
-					{ KnownTypes.Wpf.FontStretch,	new TypeEditor(KnownTypes.Wpf.FontStretch,	EditorKeys.EnumEditorKey) },
-					{ KnownTypes.Wpf.FontStyle,		new TypeEditor(KnownTypes.Wpf.FontStyle,	EditorKeys.EnumEditorKey) },
-					{ KnownTypes.Wpf.FontWeight,	new TypeEditor(KnownTypes.Wpf.FontWeight,	EditorKeys.EnumEditorKey) },
-					{ KnownTypes.Wpf.Cursor,		new TypeEditor(KnownTypes.Wpf.Cursor,		EditorKeys.EnumEditorKey) },
-					{ KnownTypes.Wpf.FontFamily,	new TypeEditor(KnownTypes.Wpf.FontFamily,	EditorKeys.FontFamilyEditorKey) },
-					{ KnownTypes.Wpf.Brush,			new TypeEditor(KnownTypes.Wpf.Brush,		EditorKeys.BrushEditorKey) },
-					{ KnownTypes.Wpf.Pen,			new TypeEditor(KnownTypes.Wpf.Pen,			EditorKeys.PenEditorKey) },
-					{ KnownTypes.Wpf.DashStyle,		new TypeEditor(KnownTypes.Wpf.DashStyle,	EditorKeys.DashStyleEditorKey) },
-					{ typeof(Enum),					new TypeEditor(typeof(Enum),				EditorKeys.EnumEditorKey) }
+					{ typeof(Boolean),						new TypeEditor(typeof(Boolean),						EditorKeys.BooleanEditorKey) },
+					{ KnownTypes.Wpf.FontStretch,			new TypeEditor(KnownTypes.Wpf.FontStretch,			EditorKeys.EnumEditorKey) },
+					{ KnownTypes.Wpf.FontStyle,				new TypeEditor(KnownTypes.Wpf.FontStyle,			EditorKeys.EnumEditorKey) },
+					{ KnownTypes.Wpf.FontWeight,			new TypeEditor(KnownTypes.Wpf.FontWeight,			EditorKeys.EnumEditorKey) },
+					{ KnownTypes.Wpf.Cursor,				new TypeEditor(KnownTypes.Wpf.Cursor,				EditorKeys.EnumEditorKey) },
+					{ KnownTypes.Wpf.FontFamily,			new TypeEditor(KnownTypes.Wpf.FontFamily,			EditorKeys.FontFamilyEditorKey) },
+					{ KnownTypes.Wpf.Brush,					new TypeEditor(KnownTypes.Wpf.Brush,				EditorKeys.BrushEditorKey) },
+					{ KnownTypes.Wpf.Pen,					new TypeEditor(KnownTypes.Wpf.Pen,					EditorKeys.PenEditorKey) },
+					{ KnownTypes.Wpf.DashStyle,				new TypeEditor(KnownTypes.Wpf.DashStyle,			EditorKeys.DashStyleEditorKey) },
+					{ typeof(DateTime),						new TypeEditor(typeof(DateTime),					EditorKeys.DateTimeEditor) },
+					{ typeof(double),						new TypeEditor(typeof(double),						EditorKeys.DoubleEditorKey) },
+					{ typeof(int),							new TypeEditor(typeof(int),							EditorKeys.IntEditorKey) },
+					{ typeof(Enum),							new TypeEditor(typeof(Enum),						EditorKeys.EnumEditorKey) },
 				};
 
 		/// <summary>
@@ -64,7 +68,6 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			return this.OfType<PropertyEditor>().Where(item => item.DeclaringType.IsAssignableFrom(declaringType)).FirstOrDefault(item => item.PropertyName == propertyName);
 		}
-
 
 		/// <summary>
 		/// Finds the category editor.
@@ -94,7 +97,13 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			try
 			{
-				Type editorType = Type.GetType(attribute.EditorType);
+				Type editorType = null;// = Type.GetType(attribute.EditorType);
+				foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+				{
+					editorType = a.GetType(attribute.EditorType);
+					if (editorType != null)
+						break;
+				}
 				if (editorType == null || !KnownTypes.Wpg.Editor.IsAssignableFrom(editorType)) return null;
 				return (Editor)Activator.CreateInstance(editorType);
 			}
@@ -116,10 +125,8 @@ namespace System.Windows.Controls.WpfPropertyGrid
 
 			string name = categoryName.ToUpperInvariant();
 
-			CategoryEditorAttribute attribute = declaringType
-			  .GetCustomAttributes(KnownTypes.Attributes.CategoryEditorAttribute, true)
-			  .OfType<CategoryEditorAttribute>()
-			  .FirstOrDefault(attr => attr.CategoryName == name);
+			CategoryEditorAttribute attribute = declaringType.GetCustomAttributes(KnownTypes.Attributes.CategoryEditorAttribute, true)
+																	.OfType<CategoryEditorAttribute>().FirstOrDefault(attr => attr.CategoryName == name);
 
 			if (attribute == null) return null;
 
@@ -187,6 +194,9 @@ namespace System.Windows.Controls.WpfPropertyGrid
 				editor = GetPropertyEditorByAttributes(propertyItem.Attributes);
 				if (editor != null) return editor;
 			}
+
+			if(propertyItem.PropertyType != typeof(bool) && propertyItem.Converter != null && propertyItem.Converter.GetStandardValuesSupported())
+				return new TypeEditor(propertyItem.PropertyType, EditorKeys.StandardValuesEditorKey);
 
 			if (propertyItem.Component != null && !string.IsNullOrEmpty(propertyItem.Name))
 			{

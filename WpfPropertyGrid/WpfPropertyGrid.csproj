@@ -43,7 +43,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -132,16 +133,21 @@
     <Compile Include="Design\PropertyNameTextBlock.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorKeys.cs" />
-    <Compile Include="FieldPropertyDescriptor.cs" />
     <Compile Include="FontInfo.cs" />
     <Compile Include="GridEntryCollection.cs" />
     <Compile Include="KnownTypes.cs" />
-    <Compile Include="Metadata\CategoryEditorAttribute.cs" />
-    <Compile Include="Metadata\CategoryOrderAttribute.cs" />
-    <Compile Include="Metadata\CategoryExpandedAttribute.cs" />
-    <Compile Include="Metadata\LocalizationResourceHelper.cs" />
-    <Compile Include="Metadata\PropertyEditorAttribute.cs" />
     <Compile Include="MetadataRepository.cs" />
+    <Compile Include="Metadata\BrowsableCategoryAttribute.cs" />
+    <Compile Include="Metadata\BrowsablePropertyAttribute.cs" />
+    <Compile Include="Metadata\CategoryEditorAttribute.cs" />
+    <Compile Include="Metadata\CategoryExpandedAttribute.cs" />
+    <Compile Include="Metadata\CategoryOrderAttribute.cs" />
+    <Compile Include="Metadata\EncryptAttribute.cs" />
+    <Compile Include="Metadata\FlatternHierarchyAttribute.cs" />
+    <Compile Include="Metadata\LocalizationResourceHelper.cs" />
+    <Compile Include="Metadata\NumberRangeAttribute.cs" />
+    <Compile Include="Metadata\PropertyEditorAttribute.cs" />
+    <Compile Include="Metadata\PropertyOrderAttribute.cs" />
     <Compile Include="PropertyEditing\DashStyleList.cs" />
     <Compile Include="Controls\BrushSelector.cs" />
     <Compile Include="PropertyEditingEventArgs.cs" />
@@ -161,13 +167,8 @@
     <Compile Include="Design\TabbedLayout.cs" />
     <Compile Include="Design\TabbedLayoutItem.cs" />
     <Compile Include="Metadata\AttributesContainer.cs" />
-    <Compile Include="Metadata\BrowsableCategoryAttribute.cs" />
-    <Compile Include="Metadata\BrowsablePropertyAttribute.cs" />
-    <Compile Include="Metadata\FlatternHierarchyAttribute.cs" />
     <Compile Include="Input\PropertyGridCommands.cs" />
-    <Compile Include="Metadata\NumberRangeAttribute.cs" />
     <Compile Include="Controls\DoubleEditor.cs" />
-    <Compile Include="Metadata\PropertyOrderAttribute.cs" />
     <Compile Include="ObjectServices.cs" />
     <Compile Include="PropertyGrid.Commands.cs" />
     <Compile Include="PropertyGridUtils.cs" />
@@ -195,11 +196,13 @@
     <Compile Include="PropertyGrid.cs" />
     <Compile Include="PropertyItem.cs" />
     <Compile Include="PropertyItemValue.cs" />
+    <Compile Include="Utils\MTObservableCollection.cs" />
     <Compile Include="Utils\PasswordBoxExtender.cs" />
     <Compile Include="Utils\TextBoxExtender.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
