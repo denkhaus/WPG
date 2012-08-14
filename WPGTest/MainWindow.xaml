@@ -1,0 +1,15 @@
+﻿<Window x:Class="WPGTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:WpfPropertyGrid="clr-namespace:System.Windows.Controls.WpfPropertyGrid;assembly=System.Windows.Controls.WpfPropertyGrid"
+        xmlns:Design="clr-namespace:System.Windows.Controls.WpfPropertyGrid.Design;assembly=System.Windows.Controls.WpfPropertyGrid"
+        Title="MainWindow" Height="350" Width="525"
+		Loaded="OnLoaded">
+    <Grid>
+		<WpfPropertyGrid:PropertyGrid x:Name="propertyGrid">
+			<WpfPropertyGrid:PropertyGrid.Layout>
+				<Design:CategorizedLayout />
+			</WpfPropertyGrid:PropertyGrid.Layout>
+		</WpfPropertyGrid:PropertyGrid>
+	</Grid>
+</Window>
